@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Five Rounds</title>
   <meta name="description" content="8-week BJJ conditioning plan, round timer and fuel tracker.">
@@ -19,7 +20,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap">
   <style>
-    /* Layout: one narrow column like a phone app — week strip on top, day rows, bottom tab bar. Purple-belt accent on mat-tinted neutrals. Push */
+    /* Layout: one narrow column like a phone app — week strip on top, day rows, bottom tab bar. Purple-belt accent on mat-tinted neutrals. */
     :root {
       --bg: #f5f4f8;
       --surface: #ffffff;
@@ -1173,21 +1174,6 @@
       display: none !important
     }
 
-    .lock {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      background: color-mix(in srgb, var(--bg) 92%, transparent);
-      display: grid;
-      place-items: center;
-      padding: 16px
-    }
-
-    .lock .panel {
-      width: 100%;
-      max-width: 380px
-    }
-
     textarea#bk-text {
       min-height: 80px;
       font-size: 13px
@@ -1311,16 +1297,15 @@
       function hydrate(o) { S = Object.assign(fresh(), o); S.custom = S.custom || {}; S.fuel = Object.assign(freshFuel(), S.fuel || {}); S.fuel.weights = S.fuel.weights || {}; S.fuel.food = S.fuel.food || {}; S.fuel.ingr = S.fuel.ingr || {}; S.fuel.meals = S.fuel.meals || {}; S.fuel.draft = S.fuel.draft || emptyDraft() }
       function loadLocal() { try { const r = localStorage.getItem("fre-state"); if (r) hydrate(JSON.parse(r)) } catch (e) { } }
       function saveLocal() { try { localStorage.setItem("fre-state", JSON.stringify(S)) } catch (e) { } }
-      function appKey() { try { return localStorage.getItem("fre-key") || "" } catch (e) { return "" } }
       async function api(method, body) {
-        const r = await fetch("/api/state", { method, headers: { "content-type": "application/json", "x-app-key": appKey() }, body: body ? JSON.stringify(body) : undefined, cache: "no-store" });
+        const r = await fetch("/api/state", { method, headers: { "content-type": "application/json" }, credentials: "same-origin", body: body ? JSON.stringify(body) : undefined, cache: "no-store" });
         if (r.status === 401) throw { code: "auth" };
         if (r.status === 503) throw { code: "off" };
         if (!r.ok) throw { code: "net" };
         return r.json();
       }
       function handleErr(e) {
-        if (e && e.code === "auth") { remote = "locked"; setSync("Locked", false); showLock(true) }
+        if (e && e.code === "auth") { remote = "locked"; setSync("Signed out", false); if (navigator.onLine) location.replace("/login.html") }
         else if (e && e.code === "off") { remote = "off"; setSync("Saved on this device", false) }
         else setSync("Offline · saved on device", false);
       }
@@ -1334,23 +1319,11 @@
       }
       async function pull() {
         try {
-          const j = await api("GET"); remote = "on"; showLock(false);
+          const j = await api("GET"); remote = "on";
           if (j.state && (j.state._t || 0) > (S._t || 0)) { hydrate(j.state); saveLocal(); safeRender() }
           else if (!j.state || (S._t || 0) > (j.state._t || 0)) { dirty = true; await flush() }
           setSync("Synced", true);
         } catch (e) { handleErr(e) }
-      }
-      function showLock(on) {
-        let el = document.getElementById("lock");
-        if (!on) { if (el) el.hidden = true; return }
-        if (!el) {
-          el = document.createElement("div"); el.id = "lock"; el.className = "lock";
-          el.innerHTML = `<form class="panel" id="lockform"><h2>Enter your passcode</h2><div class="hint">This is the APP_KEY you set in Vercel. You only enter it once on each device.</div><input id="lockkey" type="password" autocomplete="current-password" placeholder="Passcode"><div class="row"><button class="btn primary" type="submit">Unlock</button><button class="btn" type="button" id="lockskip">Use this device only</button></div><div class="hint" id="lockmsg"></div></form>`;
-          document.body.appendChild(el);
-          el.querySelector("#lockform").addEventListener("submit", async ev => { ev.preventDefault(); try { localStorage.setItem("fre-key", el.querySelector("#lockkey").value) } catch (e) { } el.querySelector("#lockmsg").textContent = "Checking…"; await pull(); if (remote === "locked") el.querySelector("#lockmsg").textContent = "That passcode didn't work." });
-          el.querySelector("#lockskip").addEventListener("click", () => { el.hidden = true; setSync("Saved on this device", false) });
-        }
-        el.hidden = false;
       }
       async function initStore() {
         loadLocal(); setSync("Connecting", false); render();
@@ -1645,6 +1618,7 @@
   <li><div><strong>Log it here</strong><p>Week tab → the day → avg/max HR and RPE. On rowing days, enter HR at the end of each round and at the end of each rest. This page calculates the recovery drop and the pacing fade.</p></div></li>
   <li><div><strong>Morning check</strong><p><span class="path">Health → Heart</span> for resting HR and HRV, <span class="path">Health → Sleep</span> for hours. Enter them under Today's readiness. After a few days you get a flag when you should ease off.</p></div></li>
   </ol></div>
+  <div class="panel"><h3>This device</h3><div class="hint">Signed in for 60 days. Sign out if you used someone else's phone.</div><div class="row"><button class="btn" id="signout">Sign out</button></div></div>
   <div class="panel"><h3>Backup</h3><div class="hint">Copy everything (plan edits, logs, food, weights) as text, or paste a backup to restore it. Use it to move your data to another copy of the app.</div>
     <div class="row"><button class="btn" id="bk-copy">Copy backup</button><span class="hint" id="bk-msg"></span></div>
     <textarea id="bk-text" placeholder="Paste a backup here to restore"></textarea>
@@ -1930,6 +1904,7 @@
         if (e.target.id === "tgo") { T.running ? pauseTimer() : startTimer(); return }
         if (e.target.id === "treset") { resetTimer(); paintTimer(); return }
         if (e.target.id === "tskip") { if (T.phases[T.idx].t !== "done") { T.idx++; T.left = T.phases[T.idx].dur; if (T.phases[T.idx].t === "done") { pauseTimer() } paintTimer() } return }
+        if (e.target.id === "signout") { fetch("/api/logout", { method: "POST" }).finally(() => { try { localStorage.removeItem("fre-state") } catch (err) { } if (window.caches) caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))).finally(() => location.replace("/login.html")); else location.replace("/login.html") }); return }
         if (e.target.id === "bk-copy") {
           const txt = JSON.stringify(S), ta = document.getElementById("bk-text"), msg = document.getElementById("bk-msg");
           const fb = () => { ta.value = txt; ta.focus(); ta.select(); msg.textContent = "Select all and copy." };

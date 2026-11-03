@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Sign in · Five Rounds</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Five Rounds">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Work+Sans:wght@400;500;600&display=swap">
+    <style>
+        :root {
+            --bg: #f5f4f8;
+            --surface: #fff;
+            --sunk: #ecebf2;
+            --line: #dcdae6;
+            --fg: #1d1a27;
+            --muted: #6a6578;
+            --accent: #6b3fb0;
+            --accent-ink: #fff;
+            --bad: #c2410c;
+            --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+            --body: "Work Sans", system-ui, -apple-system, sans-serif
+        }
+
+        @media (prefers-color-scheme:dark) {
+            :root {
+                --bg: #14121b;
+                --surface: #1d1a27;
+                --sunk: #100e16;
+                --line: #2e2a3b;
+                --fg: #eeebf5;
+                --muted: #9c96ad;
+                --accent: #a77ee8;
+                --accent-ink: #14121b;
+                --bad: #f07a4a;
+                color-scheme: dark
+            }
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: var(--body);
+            font-size: 15px
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))
+        }
+
+        form {
+            width: 100%;
+            max-width: 360px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px
+        }
+
+        img {
+            width: 56px;
+            height: 56px;
+            border-radius: 13px
+        }
+
+        h1 {
+            font-family: var(--display);
+            font-size: 32px;
+            text-transform: uppercase;
+            margin: 0;
+            line-height: 1
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 600;
+            color: var(--muted)
+        }
+
+        input {
+            font: inherit;
+            font-size: 17px;
+            color: var(--fg);
+            background: var(--sunk);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 11px 12px;
+            width: 100%
+        }
+
+        input:focus-visible,
+        button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px
+        }
+
+        #code {
+            letter-spacing: .3em;
+            font-variant-numeric: tabular-nums
+        }
+
+        button {
+            appearance: none;
+            border: 0;
+            background: var(--accent);
+            color: var(--accent-ink);
+            font: inherit;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer
+        }
+
+        button:disabled {
+            opacity: .6
+        }
+
+        #msg {
+            color: var(--bad);
+            font-size: 14px;
+            min-height: 1.2em
+        }
+
+        [hidden] {
+            display: none !important
+        }
+    </style>
+</head>
+
+<body>
+    <form id="f" autocomplete="on">
+        <img src="/icons/icon-192.png" alt="">
+        <h1>Five Rounds</h1>
+        <p>Private. Sign in to continue.</p>
+        <input type="text" name="username" value="zlatko" autocomplete="username" hidden>
+        <label>Passcode<input id="pass" type="password" autocomplete="current-password" required></label>
+        <label id="codewrap" hidden>Authenticator code<input id="code" inputmode="numeric" autocomplete="one-time-code"
+                pattern="\d{6}" maxlength="6" placeholder="123456"></label>
+        <button id="go" type="submit">Sign in</button>
+        <div id="msg" role="alert"></div>
+    </form>
+    <script>
+        (async () => {
+            const $ = (id) => document.getElementById(id);
+            try { const r = await fetch("/api/login", { cache: "no-store" }); const j = await r.json(); if (j.totp) { $("codewrap").hidden = false; $("code").required = true; } } catch (e) { }
+            $("f").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                $("go").disabled = true; $("msg").textContent = "";
+                try {
+                    const r = await fetch("/api/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ passcode: $("pass").value, code: $("code").value.trim() }) });
+                    const j = await r.json().catch(() => ({}));
+                    if (r.ok) { location.replace("/"); return; }
+                    $("msg").textContent = j.error || "Sign-in failed.";
+                    $("code").value = "";
+                } catch (err) {
+                    $("msg").textContent = "You're offline. Connect and try again.";
+                }
+                $("go").disabled = false;
+            });
+        })();
+    </script>
+</body>
+
+</html>

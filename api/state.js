@@ -1,44 +1,16 @@
 // GET  /api/state  -> { state }        the saved app data (or null)
 // PUT  /api/state  { state } -> { ok }  replace the saved app data
-// Both need the header x-app-key to match the APP_KEY environment variable.
-// Data lives in Upstash Redis (Vercel → Storage → Upstash for Redis).
-import { timingSafeEqual } from "node:crypto";
+// Needs a signed-in session (see api/login.js). Data lives in Upstash Redis.
+import { hasSession } from "./_lib/session.js";
+import { redis, redisConfigured } from "./_lib/redis.js";
 
 const KEY = "five-rounds:state";
 const MAX_BYTES = 900_000;
 
-function keyMatches(given, expected) {
-  const a = Buffer.from(String(given || ""));
-  const b = Buffer.from(String(expected));
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
-async function redis(command) {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-    body: JSON.stringify(command),
-  });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.error) throw new Error(json.error || `Redis ${res.status}`);
-  return json.result;
-}
-
 export default async function handler(req, res) {
   res.setHeader("cache-control", "no-store");
-
-  const configured =
-    (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) &&
-    (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN) &&
-    process.env.APP_KEY;
-  if (!configured) {
-    return res.status(503).json({ error: "Storage is not set up. Add Upstash Redis and APP_KEY in Vercel." });
-  }
-  if (!keyMatches(req.headers["x-app-key"], process.env.APP_KEY)) {
-    return res.status(401).json({ error: "Wrong passcode." });
-  }
+  if (!hasSession(req)) return res.status(401).json({ error: "Sign in first." });
+  if (!redisConfigured()) return res.status(503).json({ error: "Connect Upstash Redis in Vercel first." });
 
   try {
     if (req.method === "GET") {
@@ -52,12 +24,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Expected { state: {...} }." });
       }
       const raw = JSON.stringify(body.state);
-      if (Buffer.byteLength(raw) > MAX_BYTES) {
-        return res.status(413).json({ error: "Data is too large." });
-      }
-      // Keep the previous copy as a one-step undo.
+      if (Buffer.byteLength(raw) > MAX_BYTES) return res.status(413).json({ error: "Data is too large." });
       const prev = await redis(["GET", KEY]);
-      if (prev) await redis(["SET", `${KEY}:previous`, prev]);
+      if (prev) await redis(["SET", `${KEY}:previous`, prev]); // one-step undo
       await redis(["SET", KEY, raw]);
       return res.status(200).json({ ok: true });
     }
