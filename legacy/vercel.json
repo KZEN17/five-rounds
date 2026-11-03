@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "public",
+  "headers": [
+    { "source": "/sw.js", "headers": [{ "key": "cache-control", "value": "no-cache" }] },
+    { "source": "/index.html", "headers": [{ "key": "cache-control", "value": "no-cache" }] },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "x-content-type-options", "value": "nosniff" },
+        { "key": "referrer-policy", "value": "same-origin" }
+      ]
+    }
+  ]
+}
