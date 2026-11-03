@@ -1,0 +1,176 @@
+Food Item	Serving Size	Calories per Serving	Protein (g)	Carbs (g)	Fat (g)	Category
+Chicken Breast	100g	120	23	1	2.5	Protein
+Smoked Chicken	100g	89	19	0	1	Protein
+Roasted Chicken Breast	100g	165	31	0	4	Protein
+Chicken Thigh	100g	209	26	0	11	Protein
+Chicken Liver	100g	190	24	1	6	Protein
+Turkey Breast	100g	135	30	0	1	Protein
+Salmon	100g	208	20	0	13	Protein
+Chajna	100g	473	23	0.1	44	Protein
+Smoked Sausage	100g	240	14	5	20	Protein
+Tuna (canned)	100g	116	26	0	1	Protein
+Tuna Captain Ocean soy oil 	100g	146	25	0	5.1	Protein
+Pastrmka	100g	86	14.7	0	3	Protein
+Chadena Shunka	100g	65.86	15.37	9.18	1.53	Protein
+Cod	100g	82	18	0	1	Protein
+Oslich	100g	95	19	0	1.7	Protein
+Shrimp	100g	99	24	0	0.3	Protein
+Ground Beef (lean)	100g	250	26	0	15	Protein
+Beef Steak	100g	271	25	0	19	Protein
+Pork Chop	100g	231	23	0	14	Protein
+Pork leg	100g	210	24	0	12	Protein
+Eggs (large)	100g	155	13	1.1	11	Protein
+Egg whites	100g	52	11	0	0	Protein
+Eggs (small/medium boiled)	100g	60	6	0.5	4	Protein
+Greek Yogurt (Bella Farm)	100g	54	10.2	3.6	0	Protein
+Greek Yogurt (Olympus)	100g	54	9.5	4	0	Protein
+Greek Yogurt (regular)	100g	50	6	3.2	1.5	Protein
+Grekos banana kikiriki	100g	64	5.6	6.6	1.7	Protein
+Cottage Cheese	100g	98	11	3.4	4.3	Protein
+Urda Cheese	100g	77	13	3	7	Protein
+Cheddar Cheese	100g	403	25	1.3	33	Protein
+Mozzarella	100g	280	28	3.1	17	Protein
+Dan milks cheese	100g	195	15	4	12.1	Protein
+Sheep cheese	100g	275	16	1.1	27	Protein
+Feta Cheese	100g	264	14	4.1	21	Protein
+Whey Protein Powder	100g	400	74	8	6	Protein
+Tofu	100g	76	8	1.9	4.8	Protein
+Tempeh	100g	193	19	9	11	Protein
+Lentils (cooked)	100g	116	9	20	0.4	Protein
+Chickpeas (cooked)	100g	164	9	27	2.6	Protein
+Black Beans (cooked)	100g	132	9	24	0.5	Protein
+Lettuce	100g	14	1	2.9	0	Vegetables
+Spinach	100g	23	2.9	3.6	0.4	Vegetables
+Green Olives	100g	145	1	6	15	Vegetables
+Kale	100g	49	4.3	9	0.9	Vegetables
+Arugula	100g	25	2.6	3.7	0.7	Vegetables
+Broccoli	100g	34	2.8	7	0.4	Vegetables
+Cauliflower	100g	25	1.9	5	0.3	Vegetables
+Brussels Sprouts	100g	43	3.4	9	0.3	Vegetables
+Cabbage	100g	25	1.3	6	0.1	Vegetables
+Piperka pechena	100g	29	1.8	3.6	0.7	Vegetables
+Russian Salad Mix	100g	58	2.6	9.6	0.3	Vegetables
+Royal mix	100g	18.7	1.66	2.13	0.4	Vegetables
+Carrots	100g	41	0.9	10	0.2	Vegetables
+Bell Peppers	100g	31	1	6	0.3	Vegetables
+Peppers (Bell)	100g	57	1	13	0.2	Vegetables
+Chili Peppers	100g	24	1	5	0.2	Vegetables
+Tomatoes	100g	18	0.9	3.9	0.2	Vegetables
+Cherry Tomatoes	100g	18	0.9	3.9	0.2	Vegetables
+Cucumber	100g	16	0.7	3.6	0.1	Vegetables
+Zucchini	100g	17	1.2	3.1	0.3	Vegetables
+Eggplant	100g	25	1	6	0.2	Vegetables
+Beetroot	100g	30	1	7	0.2	Vegetables
+Radish	100g	16	0.7	3.4	0.1	Vegetables
+Meshana Salata DiEm	100g	26.6	0.8	10	0.1	Vegetables
+Celery	100g	14	0.7	3	0.2	Vegetables
+Asparagus	100g	20	2.2	3.9	0.1	Vegetables
+Green Beans	100g	31	1.8	7	0.2	Vegetables
+Peas	100g	81	5.4	14	0.4	Vegetables
+Corn	100g	86	3.3	19	1.4	Vegetables
+Mushrooms	100g	22	3.1	3.3	0.3	Vegetables
+Onions	100g	40	1.1	9	0.1	Vegetables
+Garlic	100g	149	6.4	33	0.5	Vegetables
+Leeks	100g	61	1.5	14	0.3	Vegetables
+Pickles	100g	24	0	5	0	Vegetables
+Gjuvec	100g	29	2.3	4.5	0.3	Vegetables
+Ajvar	100g	145	3.5	13	2.2	Vegetables
+Apple (fresh)	100g	52	0.3	14	0.2	Fruits
+Banana	100g	89	1.1	23	0.3	Fruits
+Orange	100g	47	0.9	12	0.1	Fruits
+Strawberries	100g	32	0.7	8	0.3	Fruits
+Blueberries	100g	57	0.7	14	0.3	Fruits
+Raspberries	100g	52	1.2	12	0.7	Fruits
+Blackberries	100g	43	1.4	10	0.5	Fruits
+Grapes	100g	69	0.7	18	0.2	Fruits
+Watermelon	100g	30	0.6	8	0.2	Fruits
+Cantaloupe	100g	34	0.8	8	0.2	Fruits
+Pineapple	100g	50	0.5	13	0.1	Fruits
+Melon	100g	35	0.6	8.2	0.1	Fruits
+Mango	100g	60	0.8	15	0.4	Fruits
+Papaya	100g	43	0.5	11	0.3	Fruits
+Peach	100g	39	0.9	10	0.3	Fruits
+Pear	100g	57	0.4	15	0.1	Fruits
+Plum	100g	46	0.7	11	0.3	Fruits
+Kiwi	100g	61	1.1	15	0.5	Fruits
+Pomegranate	100g	83	1.7	19	1.2	Fruits
+Cherries	100g	63	1.1	16	0.2	Fruits
+Grapefruit	100g	42	0.8	11	0.1	Fruits
+Lemon	100g	29	1.1	9	0.3	Fruits
+Avocado	100g	160	2	9	15	Fruits
+Almonds	100g	580	21	22	50	Nuts
+Walnuts	100g	654	15	14	65	Nuts
+Cashews	100g	553	18	30	44	Nuts
+Peanuts	100g	567	26	16	49	Nuts
+Pistachios	100g	560	20	28	45	Nuts
+Hazelnuts	100g	628	15	17	61	Nuts
+Pecans	100g	691	9	14	72	Nuts
+Macadamia Nuts	100g	718	8	14	76	Nuts
+Brazil Nuts	100g	656	14	12	66	Nuts
+Peanut Butter	100g	600	25	20	50	Nuts
+Almond Butter	100g	614	21	20	55	Nuts
+Sunflower Seeds	100g	584	21	20	51	Nuts
+Pumpkin Seeds	100g	559	30	11	49	Nuts
+Chia Seeds	100g	486	17	42	31	Nuts
+Flax Seeds	100g	534	18	29	42	Nuts
+Sesame Seeds	100g	573	18	23	50	Nuts
+Brown Rice (cooked)	100g	111	2.6	23	0.9	Carbs
+White Rice (cooked)	100g	130	2.7	28	0.3	Carbs
+Whole Milk	100g	65	3.6	4.8	3.6	Dairy
+Tavche Gravche	100g	160	6.5	50	11.25	Carbs
+Basmati Rice (cooked)	100g	121	3	25	0.4	Carbs
+Quinoa (cooked)	100g	120	4.4	21	1.9	Carbs
+Oats (dry)	100g	389	17	66	7	Carbs
+Oatmeal (cooked)	100g	71	2.5	12	1.5	Carbs
+Whole Wheat Bread	100g	247	13	41	3.4	Carbs
+Baguette	100g	270	12	52	4.7	Carbs
+White Bread	100g	265	9	49	3.2	Carbs
+Sourdough Bread	100g	260	9	51	2	Carbs
+Pita Bread	100g	275	9	56	1.2	Carbs
+Tortilla (wheat)	100g	304	8	51	7	Carbs
+Burek	100g	303	6.6	31.7	16.2	Carbs
+imlek protein shake	100g	57	10	4.1	0.05	Protein
+imlek protein puding	100G	79	10	6.3	1.5	Protein
+imlek protein mus	100g	78	10	5.1	3.8	Protein
+Kam protein puding	100g	79	10	6.4	1.5	Protein
+Stay strong puding	100g	74	10	6.4	0.9	Protein
+Pasta (cooked)	100g	131	5	25	1.1	Carbs
+Whole Wheat Pasta (cooked)	100g	124	5.3	26	0.5	Carbs
+Spaghetti (cooked)	100g	158	5.8	31	0.9	Carbs
+Cow cheese bella farm	100g	285	13.5	2	15	Protein
+Couscous (cooked)	100g	112	3.8	23	0.2	Carbs
+Gjuvech Veggies	100g	28	1.8	3.5	0.6	Veggies
+Bulgur (cooked)	100g	83	3.1	19	0.2	Carbs
+Sweet Potato	100g	86	1.6	20	0.1	Carbs
+Potato	100g	77	2	17	0.1	Carbs
+Potato (baked)	100g	93	2.5	21	0.1	Carbs
+French Fries	100g	312	3.4	41	15	Carbs
+Yam	100g	118	1.5	28	0.2	Carbs
+Rice cake	100g	386	7.9	82.9	1.9	Carbs
+Sendvich so lovechka	100g	820	32	74	36	Carbs
+Buckwheat (cooked)	100g	92	3.4	20	0.6	Carbs
+Barley (cooked)	100g	123	2.3	28	0.4	Carbs
+Rakija	100g	185	0	0	0	Alcohol
+White Wine	100g	116	0	0	7.3	Carbs
+Oshee Protein	100g	507	27	32	32	Carbs
+Olive Oil	100g	884	0	0	100	Fats
+Malena sauce	100g	27	0.8	4.1	0	Sauce
+Coconut Oil	100g	862	0	0	100	Fats
+Pesto sauce stokomak	100g	476	5.2	4.6	48	Fats
+Butter	100g	717	0.9	0.1	81	Fats
+Ghee	100g	900	0	0	100	Fats
+Avocado Oil	100g	884	0	0	100	Fats
+Canola Oil	100g	884	0	0	100	Fats
+Sesame Oil	100g	884	0	0	100	Fats
+Nicks Protein Bar	100g	406	30	25	22	Protein
+Tekmar vegan protein	100g	344	20	24	14	Protein
+Almond Milk Kam	100g	14	0.5	1.2	1.2	Protein
+Vitalia Protein Bar	100g	486	35	33.6	24.1	Protein
+GoOn protein	100g	369	33	2.2	9.4	Protein
+Mayonnaise	100g	680	1.1	0.6	75	Fats
+Kefir	100g	56.88	3.3	4.4	2	Dairy
+Protein Pudding Zott	100g	75	10	5.1	1.5	Protein
+Kiselo Mleko	100g	56	3.3	4.2	2.8	Dairy
+Sour Cream	100g	193	2.4	4.6	19	Fats
+Jogurt Bella farm	100g	56	3	4.6	2.8	Dairy
+Heavy Cream	100g	340	2.1	2.8	36	Fats
