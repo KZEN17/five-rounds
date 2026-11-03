@@ -1,44 +1,41 @@
 # Five Rounds
 
-The 8-week BJJ conditioning app: week plan with editable days, round timer, fuel tracker with a meal builder, and progress charts. One static page plus one API route, no build step.
+Competition prep for grapplers. You sign up, enter your current fitness and your competition, and get a generated, editable plan for conditioning, strength, BJJ load, weight and calories.
 
-```
-public/index.html          the whole app
-public/sw.js               offline support
-public/manifest.webmanifest + icons/   Add to Home Screen
-api/state.js               GET/PUT your data, stored in Upstash Redis, protected by a passcode
-vercel.json                serves /public, cache headers
-```
+Version 2 is a Next.js app (App Router, TypeScript) on Vercel, with Neon Postgres via Drizzle and Better Auth (email magic links via Resend, plus Google). The original single-user static app is kept in [`legacy/`](legacy/) for reference.
 
-## Deploy (about 5 minutes)
-
-1. **Push to GitHub.** Create a new repo and push this folder.
-2. **Import in Vercel.** Go to vercel.com → Add New → Project, pick the repo, and keep Framework Preset = *Other*. Don't set a build command. Deploy.
-3. **Add storage.** In the project, go to **Storage → Create Database → Upstash for Redis** (the free tier is plenty) and connect it to the project. It adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` for you.
-4. **Set your passcode.** Go to **Settings → Environment Variables** and add `APP_KEY` with a long random value. One way to make one is `openssl rand -base64 24`.
-5. **Redeploy** (Deployments → ⋯ → Redeploy) so the function picks up the new variables.
-
-Open the site, enter the passcode once, and you're synced. On the iPhone, open it in Safari → Share → **Add to Home Screen**. It opens full-screen with its own icon and works offline. Changes sync when you're back online.
-
-**CLI instead of GitHub:** `npm i -g vercel`, then `vercel` in this folder, then steps 3–5, then `vercel --prod`.
-
-## Moving your data from the Claude version
-
-In the Claude version: Watch tab → **Backup → Copy backup**. In the Vercel app: Watch tab → paste into the backup box → **Restore from pasted backup** (tap twice).
-
-## How sync works
-
-- Every change is saved on the device straight away, then sent to `/api/state` after a short pause.
-- When the app opens or comes back to the foreground, it pulls the server copy. The newer copy wins, using a timestamp saved with your data.
-- The server keeps the previous version under `five-rounds:state:previous` as a one-step undo. You can read it in the Upstash console.
-- Without storage or `APP_KEY` set, the app still works and saves on the device only.
+- What we're building: [docs/BUILD_BRIEF.md](docs/BUILD_BRIEF.md)
+- How it's built: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## Local development
 
+```bash
+npm install
+cp .env.example .env.local          # the defaults work as-is for local dev
+npm run db:migrate                  # creates a local Postgres in ./.pglite (PGlite, no server needed)
+npm run dev                         # http://localhost:3000
 ```
-npm i -g vercel
-vercel link
-vercel env pull .env.local
-vercel dev
-```
-# five-rounds
+
+To sign in locally, enter any email and tick 18+. Without `AUTH_RESEND_KEY`, the sign-in link is printed in the terminal running `npm run dev`. Open it in the browser.
+
+To work against a Neon database instead, put its `DATABASE_URL` in `.env.local` (or run `vercel env pull .env.local`). Every `drizzle-kit` command prints which database it's about to use.
+
+## Scripts
+
+| Script | What it does |
+|---|---|
+| `npm run dev` / `build` / `start` | Next.js |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint (blocks the raw DB client outside `src/lib/db`) |
+| `npm test` | Vitest: auth flow, signup rules and per-user data isolation, on an in-memory Postgres |
+| `npm run db:generate` | New SQL migration from `src/lib/db/schema.ts` |
+| `npm run db:migrate` | Apply migrations to `DATABASE_URL` |
+
+## Vercel setup so far
+
+1. `vercel.json` declares `"framework": "nextjs"`, so this branch builds as Next.js without changing the project's Framework Preset.
+2. **Storage → Neon** (Marketplace): connect it to this project for Development, Preview and Production. This adds `DATABASE_URL`.
+3. Environment variables (see `.env.example`): `AUTH_SECRET` (required), `AUTH_RESEND_KEY` + `EMAIL_FROM` (email sign-in on deployed builds), and optionally `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`, `SIGNUP_MODE`, `OWNER_EMAIL`. Keep the existing Upstash variables.
+4. Run `npm run db:migrate` against each database before using that deployment.
+
+The full deploy and migration runbook arrives with the last milestone.

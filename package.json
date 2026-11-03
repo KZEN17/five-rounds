@@ -1,13 +1,44 @@
 {
   "name": "five-rounds",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "8-week BJJ conditioning plan, round timer and fuel tracker.",
+  "description": "Competition prep for grapplers: conditioning, strength, BJJ load, weight and fuel.",
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.15",
+    "@neondatabase/serverless": "1.2.0",
+    "better-auth": "1.7.15",
+    "drizzle-orm": "0.45.4",
+    "next": "16.4.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "resend": "6.37.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.4",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "drizzle-kit": "0.31.11",
+    "eslint": "10.14.0",
+    "eslint-config-next": "16.4.4",
+    "tailwindcss": "4.3.4",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
   }
 }
