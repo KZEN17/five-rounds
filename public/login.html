@@ -150,6 +150,19 @@
             min-height: 1.2em
         }
 
+        .setup {
+            font-size: 13px;
+            line-height: 1.45;
+            background: var(--sunk);
+            border-radius: 10px;
+            padding: 10px 12px
+        }
+
+        .setup ul {
+            margin: 6px 0 0;
+            padding-left: 18px
+        }
+
         [hidden] {
             display: none !important
         }
@@ -167,11 +180,20 @@
                 pattern="\d{6}" maxlength="6" placeholder="123456"></label>
         <button id="go" type="submit">Sign in</button>
         <div id="msg" role="alert"></div>
+        <div id="setup" class="setup" hidden></div>
     </form>
     <script>
         (async () => {
             const $ = (id) => document.getElementById(id);
-            try { const r = await fetch("/api/login", { cache: "no-store" }); const j = await r.json(); if (j.totp) { $("codewrap").hidden = false; $("code").required = true; } } catch (e) { }
+            try {
+                const r = await fetch("/api/login", { cache: "no-store" }); const j = await r.json();
+                if (j.totp) { $("codewrap").hidden = false; $("code").required = true; }
+                const st = j.setup || {}, issues = [];
+                if (!st.appKey) issues.push("<b>APP_KEY</b> isn't set for this deployment. Add it in Settings → Environment Variables, then redeploy.");
+                if (!st.redis) issues.push("No Upstash Redis variables found in this deployment." + (st.redisVars && st.redisVars.length ? " Found: " + st.redisVars.join(", ") + "." : " Connect the database to this project (Storage tab), then redeploy."));
+                else if (!st.redisReachable) issues.push("Redis variables are set but the database didn't answer. Check it's active in the Upstash console.");
+                if (issues.length) { $("setup").innerHTML = "<strong>Setup needed</strong><ul>" + issues.map(i => "<li>" + i + "</li>").join("") + "</ul>"; $("setup").hidden = false; }
+            } catch (e) { }
             $("f").addEventListener("submit", async (e) => {
                 e.preventDefault();
                 $("go").disabled = true; $("msg").textContent = "";
