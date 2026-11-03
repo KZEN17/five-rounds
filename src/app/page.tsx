@@ -9,8 +9,9 @@ const FEATURES = [
   ["Readiness", "Sleep, resting HR and HRV against your own baseline. It suggests easing off. It never forces it."],
 ] as const;
 
-export default async function Landing() {
+export default async function Landing({ searchParams }: { searchParams: Promise<{ under18?: string }> }) {
   if (await getSession()) redirect("/today");
+  const { under18 } = await searchParams;
 
   return (
     <main className="mx-auto flex max-w-140 flex-col gap-6 py-10">
@@ -22,6 +23,12 @@ export default async function Landing() {
           targets, and shows you whether the work is landing.
         </p>
       </header>
+
+      {under18 ? (
+        <p role="alert" className="flag flag-warn">
+          Five Rounds is for adults (18+), so we&apos;ve deleted that account. Thanks for understanding.
+        </p>
+      ) : null}
 
       <ul className="flex flex-col gap-3">
         {FEATURES.map(([title, text]) => (

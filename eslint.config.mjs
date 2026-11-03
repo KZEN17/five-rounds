@@ -25,6 +25,11 @@ export default defineConfig([
               message: "Use requireUser() and its scoped db, not the raw client.",
               allowTypeImports: true,
             },
+            {
+              name: "@/lib/db/scoped",
+              importNames: ["RAW"],
+              message: "RAW is for query modules inside src/lib/db only.",
+            },
           ],
           patterns: [
             {
@@ -37,5 +42,5 @@ export default defineConfig([
       ],
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "legacy/**", "drizzle/**", ".pglite/**"]),
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "legacy/**", "drizzle/**", ".pglite/**", ".pglite-e2e/**", "playwright-report/**", "test-results/**"]),
 ]);

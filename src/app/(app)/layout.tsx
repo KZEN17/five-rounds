@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { TabBar } from "@/components/tab-bar";
 import { requireUser } from "@/lib/session";
 
@@ -7,6 +8,7 @@ export const metadata: Metadata = { robots: { index: false } };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user } = await requireUser();
+  if (!user.onboardedAt) redirect("/onboarding");
   const initial = (user.name || user.email).trim().charAt(0).toUpperCase();
 
   return (

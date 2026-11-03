@@ -1,3 +1,4 @@
+import { appendFile } from "node:fs/promises";
 import { Resend } from "resend";
 
 export type SignInMail = { to: string; url: string };
@@ -36,7 +37,9 @@ export function mailSenderFromEnv(env: NodeJS.ProcessEnv = process.env): MailSen
       throw new Error("Email sign-in isn't configured. Set AUTH_RESEND_KEY and EMAIL_FROM.");
     };
   }
+  const sink = env.MAIL_SINK_FILE; // end-to-end tests read links from here
   return async ({ to, url }) => {
+    if (sink) await appendFile(sink, `${JSON.stringify({ to, url })}\n`);
     console.info(`\n[dev mail] Sign-in link for ${to}:\n${url}\n`);
   };
 }

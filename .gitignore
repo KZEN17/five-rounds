@@ -9,3 +9,5 @@ next-env.d.ts
 .pglite
 playwright-report
 test-results
+.vscode
+.pglite-e2e
