@@ -71,9 +71,13 @@ describe.each(TABLES)("%s: bob can never reach alice's rows", (_name, table) => 
 
 describe("foods", () => {
   it("everyone sees the shared list; private foods stay private", async () => {
-    const names = async (id: string) => (await scoped(db, id).foods.visible()).map((f) => f.name).sort();
-    expect(await names("alice")).toEqual(["Alice's bar", "Rice"]);
-    expect(await names("bob")).toEqual(["Rice"]);
+    const names = async (id: string) => (await scoped(db, id).foods.visible()).map((f) => f.name);
+    const alice = await names("alice");
+    const bob = await names("bob");
+    expect(alice).toEqual(expect.arrayContaining(["Alice's bar", "Rice", "Chicken Breast"]));
+    expect(bob).toEqual(expect.arrayContaining(["Rice", "Chicken Breast"]));
+    expect(bob).not.toContain("Alice's bar");
+    expect(alice.length).toBe(bob.length + 1);
   });
 
   it("bob can't delete alice's private food", async () => {
