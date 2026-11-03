@@ -3,7 +3,7 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export type Series = { key: string; name: string; tone: "accent" | "ink"; style: "line" | "dashed" | "dots" };
-export type Point = { x: string } & Record<string, number | string | null>;
+export type Point = { x: string; t?: number } & Record<string, number | string | null | undefined>;
 
 const COLOR = { accent: "var(--accent)", ink: "var(--fg)" } as const;
 
@@ -19,7 +19,10 @@ export function TrendChart({
   label,
   empty,
   height = 180,
+  time = false,
 }: {
+  /** Dated series: place points by real time (pass `t` in ms), not evenly. */
+  time?: boolean;
   data: Point[];
   series: Series[];
   unit: string;
@@ -36,7 +39,15 @@ export function TrendChart({
           <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
             <CartesianGrid vertical={false} stroke="var(--line)" strokeDasharray="2 3" />
             <XAxis
-              dataKey="x"
+              dataKey={time ? "t" : "x"}
+              {...(time
+                ? {
+                    type: "number" as const,
+                    scale: "time" as const,
+                    domain: ["dataMin", "dataMax"],
+                    tickFormatter: (t: number) => new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }),
+                  }
+                : {})}
               tick={{ fill: "var(--muted)", fontSize: 11 }}
               tickLine={false}
               axisLine={{ stroke: "var(--line)" }}
@@ -48,6 +59,7 @@ export function TrendChart({
               cursor={{ stroke: "var(--muted)", strokeDasharray: "3 3" }}
               contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 8, color: "var(--fg)", fontSize: 13 }}
               labelStyle={{ color: "var(--muted)" }}
+              labelFormatter={(label, payload) => (payload?.[0]?.payload as Point | undefined)?.x ?? String(label)}
               formatter={(value, name) => [`${value} ${unit}`, name]}
             />
             {series.length > 1 ? <Legend iconType="plainline" wrapperStyle={{ fontSize: 12, color: "var(--muted)" }} /> : null}

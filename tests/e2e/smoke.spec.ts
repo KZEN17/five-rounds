@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
+import { legacyState } from "../../src/lib/legacy/__fixtures__/legacy-state";
 
 const EMAIL = `smoke-${Date.now()}@example.com`;
 
@@ -77,4 +78,14 @@ test("sign in → onboarding → plan visible → log a session", async ({ page 
   await page.getByLabel(/Weight today/).fill("81.4");
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await page.screenshot({ path: "test-results/screens/fuel.png", fullPage: true });
+
+  // Import a backup from the old app, then see it on Progress.
+  await page.goto("/settings/data");
+  await page.getByLabel("…or paste it here").fill(JSON.stringify(legacyState));
+  await page.getByRole("button", { name: "Import", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Imported from the old app");
+  await page.getByRole("link", { name: "Progress", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Rowing pacing" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: /−3\.1%/ })).toBeVisible();
+  await page.screenshot({ path: "test-results/screens/progress.png", fullPage: true });
 });

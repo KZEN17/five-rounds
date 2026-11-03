@@ -64,7 +64,8 @@ export function WeightPanel({
         )}
       </p>
       <TrendChart
-        data={series.map((s) => ({ x: shortDate(s.date), avg: s.avg, kg: s.kg }))}
+        time
+        data={series.map((s) => ({ x: shortDate(s.date), t: Date.parse(`${s.date}T00:00:00Z`), avg: s.avg, kg: s.kg }))}
         series={[
           { key: "avg", name: "7-day average", tone: "accent", style: "line" },
           { key: "kg", name: "Weigh-ins", tone: "ink", style: "dots" },
