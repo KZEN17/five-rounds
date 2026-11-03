@@ -84,3 +84,14 @@ describe("magic-link sign-in", () => {
     expect(sent).toHaveLength(1);
   });
 });
+
+describe("when email can't be sent", () => {
+  it("passes the reason back to the sign-in form", async () => {
+    const auth = makeAuth({
+      sendMail: async () => {
+        throw new Error("Email sign-in isn't configured. Set AUTH_RESEND_KEY and EMAIL_FROM.");
+      },
+    });
+    await expect(requestLink(auth, "someone@example.com")).rejects.toThrow(/isn't configured/);
+  });
+});

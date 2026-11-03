@@ -11,6 +11,8 @@ export function SignOutButton() {
   async function signOut() {
     setBusy(true);
     await authClient.signOut();
+    // Cached pages hold this user's data: clear them on a shared device.
+    if ("caches" in window) await Promise.all((await caches.keys()).map((k) => caches.delete(k))).catch(() => {});
     router.replace("/");
     router.refresh();
   }

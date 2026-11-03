@@ -3,6 +3,7 @@ import type { z } from "zod";
 import type { IsoDate } from "@/lib/engine";
 import { profiles } from "@/lib/db/schema";
 import type { ScopedDb } from "@/lib/db/scoped";
+import { allow } from "@/lib/ratelimit";
 import { requireUser } from "@/lib/session";
 import { todayIn } from "@/lib/time";
 
@@ -27,6 +28,7 @@ export function userAction<S extends z.ZodType, T>(schema: S, handler: (input: z
     const parsed = schema.safeParse(raw);
     if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "That input isn't valid." };
     const { user, db } = await requireUser();
+    if (!(await allow("write", user.id))) return { ok: false, error: "That's a lot of changes at once. Wait a minute and try again." };
     const [profile] = await db.select(profiles).limit(1);
     const timezone = profile?.timezone ?? "UTC";
     try {

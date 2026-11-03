@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Work_Sans } from "next/font/google";
+import { Pwa } from "@/components/pwa";
 import "./globals.css";
 
 const display = Barlow_Condensed({
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   title: { default: "Five Rounds", template: "%s · Five Rounds" },
   description: "Competition prep for grapplers: conditioning, strength, BJJ load, weight and fuel.",
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
+  manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Five Rounds", statusBarStyle: "default" },
 };
 
@@ -30,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-dvh pr-[max(16px,env(safe-area-inset-right))] pl-[max(16px,env(safe-area-inset-left))] antialiased">
-        {children}
+        <Pwa>{children}</Pwa>
       </body>
     </html>
   );

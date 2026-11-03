@@ -6,6 +6,7 @@ import { z } from "zod";
 import { UserError, userAction } from "@/lib/actions";
 import { saveAndGenerate } from "@/lib/db/plan-store";
 import { deleteAccount, markOnboarded } from "@/lib/db/users";
+import { allow } from "@/lib/ratelimit";
 import { daysBetween, planInputSchema } from "@/lib/engine";
 import { requireUser } from "@/lib/session";
 import { isTimeZone, todayIn } from "@/lib/time";
@@ -17,6 +18,7 @@ const submitSchema = z.object({
 
 /** Saves the answers, generates the plan (or a new version of it) and lays it out. */
 export const submitOnboarding = userAction(submitSchema, async ({ input, timezone }, { user, db }) => {
+  if (!(await allow("generate", user.id))) throw new UserError("You've regenerated a lot in the last hour. Try again later.");
   const today = todayIn(timezone);
   if (daysBetween(today, input.competition.date) < 1) throw new UserError("Pick a competition date after today.");
   await saveAndGenerate(db, input, today, timezone);

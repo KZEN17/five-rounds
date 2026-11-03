@@ -83,7 +83,15 @@ export function createAuth(deps: AuthDeps) {
             // Invite-only and not invited: send nothing, and don't say so (no account probing).
             if (!(await mayCreateAccount(email))) return;
           }
-          await deps.sendMail({ to: email, url });
+          try {
+            await deps.sendMail({ to: email, url });
+          } catch (error) {
+            // Surface the reason (e.g. Resend's domain isn't verified) instead of a bare 500.
+            console.error(error);
+            throw new APIError("INTERNAL_SERVER_ERROR", {
+              message: error instanceof Error ? error.message : "Couldn't send the sign-in email.",
+            });
+          }
         },
       }),
       ...(deps.nextjs === false ? [] : [nextCookies()]), // nextCookies must stay last
