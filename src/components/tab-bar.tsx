@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LinkPending } from "@/components/spinner";
 
 const icon = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, "aria-hidden": true } as const;
 
@@ -72,12 +73,13 @@ export function TabBar() {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-[10px] py-1.5 text-[11px] font-semibold tracking-[0.04em] uppercase no-underline [&_svg]:size-[22px] ${
+                className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-[10px] py-1.5 text-[11px] font-semibold tracking-[0.04em] uppercase no-underline [&_svg]:size-[22px] ${
                   active ? "bg-accent-soft text-accent" : "text-muted"
                 }`}
               >
                 {tab.svg}
                 {tab.label}
+                <LinkPending className="absolute top-1 right-2" />
               </Link>
             </li>
           );

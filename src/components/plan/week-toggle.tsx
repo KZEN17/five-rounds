@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { setWeekDone } from "@/actions/plan";
+import { Spinner } from "@/components/spinner";
 
 export function WeekToggle({ weekStart, week, done }: { weekStart: string; week: number; done: boolean }) {
   const router = useRouter();
@@ -21,6 +22,7 @@ export function WeekToggle({ weekStart, week, done }: { weekStart: string; week:
         }
       />
       Week {week} completed
+      {pending ? <Spinner className="text-muted" /> : null}
     </label>
   );
 }

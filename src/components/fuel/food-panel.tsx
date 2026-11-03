@@ -6,6 +6,7 @@ import { addFoodLog, createFood, deleteFood, deleteFoodLog, deleteMeal, saveMeal
 import type { ActionResult } from "@/lib/actions";
 import type { FoodOption } from "@/lib/db/fuel-store";
 import type { MealItem } from "@/lib/db/schema";
+import { Saving } from "@/components/spinner";
 
 type Log = { id: string; name: string; kcal: number; p: number | null; c: number | null; f: number | null; ingredients: string | null };
 type Recent = Omit<Log, "id">;
@@ -113,7 +114,8 @@ export function FoodPanel({ date, isToday, logs, recent, foods, meals }: { date:
       ) : (
         <p className="hint">Nothing logged {isToday ? "today" : "for this day"} yet.</p>
       )}
-      {msg ? <p role="status" className="hint">{msg}</p> : null}
+      <Saving pending={pending} />
+      {msg && !pending ? <p role="status" className="hint">{msg}</p> : null}
     </section>
   );
 }
@@ -393,7 +395,8 @@ function MealBuilder({ date, foods, meals }: { date: string; foods: FoodOption[]
       ) : (
         <p className="hint">Search an ingredient, enter the grams, tap Add. The totals build up here.</p>
       )}
-      {msg ? <p role="status" className="hint">{msg}</p> : null}
+      <Saving pending={pending} />
+      {msg && !pending ? <p role="status" className="hint">{msg}</p> : null}
 
       {meals.length ? (
         <div>
@@ -446,7 +449,8 @@ function NewIngredient({ mine }: { mine: FoodOption[] }) {
           >
             Save ingredient
           </button>
-          {msg ? <span className="hint" role="status">{msg}</span> : null}
+          <Saving pending={pending} />
+          {msg && !pending ? <span className="hint" role="status">{msg}</span> : null}
         </div>
         {mine.length ? (
           <div className="flex flex-wrap gap-1.5">

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { applyReadinessSwaps, ignoreReadinessSwaps, saveReadiness } from "@/actions/readiness";
+import { Saving } from "@/components/spinner";
 
 type Entry = { sleepH: number | null; rhr: number | null; hrv: number | null; soreness: number | null; mood: number | null };
 type Flag = { code: string; message: string };
@@ -124,6 +125,7 @@ export function ReadinessBanner({ swaps }: { swaps: { from: string; to: string }
         <button type="button" className="btn" disabled={pending} onClick={() => run(() => ignoreReadinessSwaps({}))}>
           Ignore
         </button>
+        <Saving pending={pending} label="Updating…" />
       </div>
     </section>
   );

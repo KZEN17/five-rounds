@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DayList } from "@/components/plan/day-list";
 import { WeekToggle } from "@/components/plan/week-toggle";
+import { LinkPending } from "@/components/spinner";
 import { addDays, PHASE_LABEL } from "@/lib/engine";
 import { loadPlan } from "@/lib/plan-view";
 import { requireUser } from "@/lib/session";
@@ -41,7 +42,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
             href={`/plan?week=${s.index}`}
             scroll={false}
             aria-current={s.index === v.week ? "page" : undefined}
-            className={`flex min-h-12 min-w-11 flex-1 flex-col items-center justify-center rounded-[10px] border px-1 font-display text-xl font-semibold no-underline ${
+            className={`relative flex min-h-12 min-w-11 flex-1 flex-col items-center justify-center rounded-[10px] border px-1 font-display text-xl font-semibold no-underline ${
               s.index === v.week
                 ? "border-accent bg-accent text-accent-ink"
                 : s.marked
@@ -53,6 +54,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
             <small className={`font-body text-[9px] tracking-[0.08em] uppercase ${s.index === v.week ? "opacity-80" : s.marked ? "text-good" : "text-muted"}`}>
               {s.marked ? "Done" : s.done ? `${s.done}/${s.total}` : s.phase === "taper" ? "Taper" : `${s.total} sess`}
             </small>
+            <LinkPending className="absolute top-1 right-1" />
           </Link>
         ))}
       </nav>

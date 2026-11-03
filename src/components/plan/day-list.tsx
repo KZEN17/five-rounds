@@ -8,6 +8,7 @@ import { WEEKDAYS, type SessionType } from "@/lib/engine";
 import { logSummary, SESSION_META, SWAP_TYPES, tagFor, TIMES, TONE_CLASS } from "@/lib/session-meta";
 import { shortDate } from "@/lib/time";
 import type { DayView, SessionView } from "@/lib/views";
+import { Saving, Spinner } from "@/components/spinner";
 import { LogForm } from "./log-form";
 
 function useAction() {
@@ -93,7 +94,7 @@ function Day({ day, open, onToggle }: { day: DayView; open: boolean; onToggle: (
                 all ? "border-good bg-good text-accent-ink" : done ? "border-good text-[10px] font-bold text-good" : "border-line text-transparent"
               }`}
             >
-              {done && !all ? `${done}/${total}` : "✓"}
+              {pending ? <Spinner className="text-muted" /> : done && !all ? `${done}/${total}` : "✓"}
             </span>
           </button>
         ) : null}
@@ -144,6 +145,7 @@ function DayEditor({ day }: { day: DayView }) {
             Reset day to the plan
           </button>
         ) : null}
+        <Saving pending={pending} />
         {error ? <p role="alert" className="flag flag-warn">{error}</p> : null}
       </div>
     </div>
@@ -220,6 +222,7 @@ function SessionEditor({ s }: { s: SessionView }) {
       <button type="button" className="btn btn-small self-start" disabled={pending} onClick={() => run(() => removeSession({ sessionId: s.id }))}>
         Remove this session
       </button>
+      <Saving pending={pending} />
       {error ? <p role="alert" className="flag flag-warn">{error}</p> : null}
     </div>
   );

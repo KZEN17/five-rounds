@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { saveWeight } from "@/actions/fuel";
 import { TrendChart } from "@/components/charts/trend-chart";
+import { Saving } from "@/components/spinner";
 import { shortDate } from "@/lib/time";
 
 export function WeightPanel({
@@ -52,6 +53,7 @@ export function WeightPanel({
           Save
         </button>
       </form>
+      <Saving pending={pending} />
       {error ? <p role="alert" className="flag flag-warn">{error}</p> : null}
       <p className="hint">
         Weigh in the morning after the toilet, before food.{" "}

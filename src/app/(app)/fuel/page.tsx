@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FoodPanel } from "@/components/fuel/food-panel";
 import { WeightPanel } from "@/components/fuel/weight-panel";
+import { LinkPending } from "@/components/spinner";
 import { userTimezone } from "@/lib/actions";
 import { fuelDay } from "@/lib/db/fuel-store";
 import { activePlan, latestInput } from "@/lib/db/plan-store";
@@ -39,12 +40,14 @@ export default async function FuelPage({ searchParams }: { searchParams: Promise
       <div className="flex items-center justify-between gap-3">
         <h2>Fuel</h2>
         <nav className="flex items-center gap-1" aria-label="Day">
-          <Link href={`/fuel?date=${addDays(date, -1)}`} className="btn btn-small" aria-label="Previous day">
+          <Link href={`/fuel?date=${addDays(date, -1)}`} className="btn btn-small relative" aria-label="Previous day">
             ‹
+            <LinkPending className="absolute -top-1 -left-1" />
           </Link>
           <span className="num min-w-28 text-center text-xl">{date === today ? "Today" : longDate(date)}</span>
-          <Link href={`/fuel?date=${addDays(date, 1)}`} className="btn btn-small" aria-label="Next day">
+          <Link href={`/fuel?date=${addDays(date, 1)}`} className="btn btn-small relative" aria-label="Next day">
             ›
+            <LinkPending className="absolute -top-1 -right-1" />
           </Link>
         </nav>
       </div>
