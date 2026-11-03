@@ -59,4 +59,22 @@ test("sign in → onboarding → plan visible → log a session", async ({ page 
   await page.getByRole("button", { name: "Start" }).click();
   await expect(page.getByRole("timer")).not.toHaveText("0:10", { timeout: 5_000 });
   await page.screenshot({ path: "test-results/screens/timer.png" });
+
+  // Fuel: build a meal from the food database and log it; weigh in.
+  await page.getByRole("link", { name: "Fuel", exact: true }).click();
+  await page.getByLabel("Meal name").fill("Chicken rice");
+  await page.getByLabel("Ingredient").fill("chicken breast");
+  await page.getByRole("option", { name: /^Chicken Breast/ }).click();
+  await page.getByLabel("Grams", { exact: true }).fill("150");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByLabel("Ingredient").fill("white rice cooked");
+  await page.getByRole("option", { name: /^White Rice \(cooked\)/ }).click();
+  await page.getByLabel("Grams", { exact: true }).fill("200");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(page.getByText("440 kcal", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "Log what I ate" }).click();
+  await expect(page.getByRole("cell", { name: /Chicken rice/ }).first()).toBeVisible();
+  await page.getByLabel(/Weight today/).fill("81.4");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.screenshot({ path: "test-results/screens/fuel.png", fullPage: true });
 });
