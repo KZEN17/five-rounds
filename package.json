@@ -1,0 +1,13 @@
+{
+  "name": "five-rounds",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "8-week BJJ conditioning plan, round timer and fuel tracker.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
