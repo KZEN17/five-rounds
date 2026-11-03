@@ -38,7 +38,7 @@ test("sign in → onboarding → plan visible → log a session", async ({ page 
 
   // Log today's first session from Today.
   await page.getByRole("link", { name: "Today" }).click();
-  await expect(page.getByRole("heading", { name: "Today" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
   const done = page.getByLabel("Session done").first();
   if (await done.count()) {
     await page.getByLabel("Minutes", { exact: true }).first().fill("60");
@@ -48,4 +48,15 @@ test("sign in → onboarding → plan visible → log a session", async ({ page 
     await expect(page.getByText("60 min").first()).toBeVisible();
   }
   await page.screenshot({ path: "test-results/screens/today.png", fullPage: true });
+
+  // Readiness: a short night flags the day.
+  await page.getByLabel("Sleep h").fill("5.5");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Ease off today.")).toBeVisible();
+
+  // Timer runs.
+  await page.getByRole("link", { name: "Timer", exact: true }).click();
+  await page.getByRole("button", { name: "Start" }).click();
+  await expect(page.getByRole("timer")).not.toHaveText("0:10", { timeout: 5_000 });
+  await page.screenshot({ path: "test-results/screens/timer.png" });
 });
