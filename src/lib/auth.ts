@@ -105,17 +105,23 @@ function vercelOrigin(host: string | undefined): string | undefined {
   return host ? `https://${host}` : undefined;
 }
 
+/** Where the app lives: AUTH_URL, else the Vercel branch URL on previews or the production URL. */
+export function appBaseUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const preview = env.VERCEL_ENV === "preview";
+  return (
+    env.AUTH_URL ??
+    (preview ? vercelOrigin(env.VERCEL_BRANCH_URL) : vercelOrigin(env.VERCEL_PROJECT_PRODUCTION_URL)) ??
+    "http://localhost:3000"
+  );
+}
+
+// Previews are reached on the branch alias and on the per-deployment URL; both are trusted below.
 function depsFromEnv(env: NodeJS.ProcessEnv = process.env): AuthDeps {
   const production = env.NODE_ENV === "production";
   const secret = env.AUTH_SECRET ?? (production ? undefined : "dev-only-secret-not-for-production-use-0000");
   if (!secret) throw new Error("AUTH_SECRET is not set.");
 
-  // Previews are reached on the branch alias and on the per-deployment URL; both must be trusted.
-  const preview = env.VERCEL_ENV === "preview";
-  const baseURL =
-    env.AUTH_URL ??
-    (preview ? vercelOrigin(env.VERCEL_BRANCH_URL) : vercelOrigin(env.VERCEL_PROJECT_PRODUCTION_URL)) ??
-    "http://localhost:3000";
+  const baseURL = appBaseUrl(env);
   const trustedOrigins = [
     baseURL,
     vercelOrigin(env.VERCEL_URL),

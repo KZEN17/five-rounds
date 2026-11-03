@@ -25,7 +25,12 @@ export function mailSenderFromEnv(env: NodeJS.ProcessEnv = process.env): MailSen
   const key = env.AUTH_RESEND_KEY;
   if (key) {
     const from = env.EMAIL_FROM;
-    if (!from) throw new Error("EMAIL_FROM must be set when AUTH_RESEND_KEY is set.");
+    // Fail the send, not the whole app: a missing sender shouldn't take every page down.
+    if (!from) {
+      return async () => {
+        throw new Error("EMAIL_FROM isn't set. Add it in Vercel (e.g. Five Rounds <onboarding@resend.dev>) and redeploy.");
+      };
+    }
     const resend = new Resend(key);
     return async ({ to, url }) => {
       const { error } = await resend.emails.send({ from, to, subject: SUBJECT, text: text(url), html: html(url) });
