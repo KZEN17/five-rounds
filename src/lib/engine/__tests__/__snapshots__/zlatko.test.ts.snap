@@ -1,0 +1,110 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Zlatko's inputs reproduce the legacy 8-week plan > matches the stored snapshot 1`] = `
+[
+  {
+    "days": [
+      "Hard BJJ",
+      "Strength (ATG) + Bike 30 min",
+      "Hard BJJ",
+      "Strength (ATG) + Bike 30 min",
+      "Hard BJJ",
+      "Comp sim 3 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "general",
+    "week": 1,
+  },
+  {
+    "days": [
+      "Hard BJJ",
+      "Strength (ATG) + Bike 35 min",
+      "Hard BJJ",
+      "Strength (ATG) + Bike 30 min",
+      "Hard BJJ",
+      "Rowing 3 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "general",
+    "week": 2,
+  },
+  {
+    "days": [
+      "Hard BJJ",
+      "Strength (ATG) + Bike 35 min",
+      "Hard BJJ",
+      "Strength (ATG) + Bike 35 min",
+      "Hard BJJ",
+      "Comp sim 4 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "general",
+    "week": 3,
+  },
+  {
+    "days": [
+      "Hard BJJ",
+      "Strength (ATG) + Bike 40 min",
+      "Hard BJJ",
+      "Strength (ATG) + Bike 35 min",
+      "Hard BJJ",
+      "Rowing 4 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "specific",
+    "week": 4,
+  },
+  {
+    "days": [
+      "Hard BJJ",
+      "Strength (ATG) + Bike 40 min",
+      "Hard BJJ",
+      "Strength (ATG) + Bike 40 min",
+      "Hard BJJ",
+      "Comp sim 4 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "specific",
+    "week": 5,
+  },
+  {
+    "days": [
+      "Hard BJJ",
+      "Strength (ATG) + Bike 45 min",
+      "Hard BJJ",
+      "Strength (ATG) + Bike 40 min",
+      "Hard BJJ",
+      "Rowing 5 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "specific",
+    "week": 6,
+  },
+  {
+    "days": [
+      "Hard BJJ",
+      "Strength (ATG) + Bike 45 min",
+      "Hard BJJ",
+      "ATG mobility + Bike 45 min",
+      "Hard BJJ",
+      "Comp sim 5 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "peak",
+    "week": 7,
+  },
+  {
+    "days": [
+      "Hard BJJ",
+      "ATG mobility + Bike 30 min",
+      "Hard BJJ",
+      "ATG mobility + Bike 30 min",
+      "Hard BJJ",
+      "Rowing 3 × 5:00",
+      "ATG mobility + Recovery walk",
+    ],
+    "phase": "taper",
+    "week": 8,
+  },
+]
+`;
