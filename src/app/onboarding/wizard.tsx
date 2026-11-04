@@ -198,7 +198,7 @@ function You() {
   return (
     <>
       <p className="hint">{NOT_MEDICAL}</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 items-end gap-3">
         <Num name="profile.age" label="Age" step="1" />
         <Select name="profile.sex" label="Sex" options={[["male", "Male"], ["female", "Female"]]} />
         <Num name="profile.heightCm" label="Height (cm)" />
@@ -249,19 +249,19 @@ function Competition() {
         {test ? "Name (optional)" : "Competition name"}
         <input {...register("competition.name")} placeholder={test ? "Test day" : "e.g. Spring Open"} />
       </label>
-      <div className="grid grid-cols-2 gap-3">
-        <label className="field">
-          {test ? "Test date" : "Date"}
-          <input type="date" {...register("competition.date")} />
-          <Err name="competition.date" />
-        </label>
-        <Select name="competition.gi" label="Format" options={[["gi", "Gi"], ["nogi", "No-gi"]]} />
-        <Select
-          name="competition.weighIn"
-          label="Weigh-in"
-          options={[["same_day", "Right before first match"], ["day_before", "Day before"], ["unsure", "Not sure"]]}
-        />
+      <label className="field">
+        {test ? "Test date" : "Date"}
+        <input type="date" {...register("competition.date")} />
+        <Err name="competition.date" />
+      </label>
+      <Select
+        name="competition.weighIn"
+        label="Weigh-in"
+        options={[["same_day", "Right before first match"], ["day_before", "Day before"], ["unsure", "Not sure"]]}
+      />
+      <div className="grid grid-cols-2 items-end gap-3">
         <Num name="competition.targetWeightKg" label="Division limit (kg)" nullable placeholder="optional" />
+        <Select name="competition.gi" label="Format" options={[["gi", "Gi"], ["nogi", "No-gi"]]} />
         <Num name="competition.matchMinutes" label="Match length (min)" />
         <Num name="competition.matches" label="Matches in a day" step="1" />
         <Num name="competition.restMinutes" label="Rest between (min)" />
@@ -282,7 +282,7 @@ function Fitness() {
         numeric
         options={[1, 2, 3, 4, 5, 6, 7, 8].map((n) => [n, String(n)] as const)}
       />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 items-end gap-3">
         <Num name="fitness.restingHr" label="Resting HR (bpm)" nullable placeholder="optional" step="1" />
         <Num name="fitness.sleepHours" label="Average sleep (h)" nullable placeholder="optional" />
         <Num name="fitness.hrv" label="HRV (ms)" nullable placeholder="optional" />
@@ -333,7 +333,7 @@ function Training() {
           );
         })}
       </fieldset>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 items-end gap-3">
         <Select name="availability.openMatDay" label="Open mat day" numeric options={[["", "None"], ...WEEKDAYS.map((d, i) => [i, d] as const)]} />
         <Select name="availability.extraSessions" label="Extra conditioning sessions / week" numeric options={[1, 2, 3, 4].map((n) => [n, String(n)] as const)} />
         <Num name="availability.extraMinutes" label="Max minutes per extra session" step="5" />
@@ -375,7 +375,7 @@ function Strength() {
           </label>
         ))}
       </fieldset>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 items-end gap-3">
         <Select name="strength.daysPerWeek" label="Days per week" numeric options={[0, 1, 2, 3].map((n) => [n, String(n)] as const)} />
         <Num name="strength.sessionMinutes" label="Session length (min)" step="5" />
       </div>

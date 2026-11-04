@@ -68,22 +68,22 @@ export function CompetitionForm({ initial, isMain, onDone }: { initial: Competit
         Name
         <input value={v.name} onChange={set("name")} placeholder="e.g. Spring Open" required />
       </label>
-      <div className="grid grid-cols-2 gap-3">
-        <label className="field">
-          Date
-          <input type="date" value={v.date} onChange={set("date")} required />
-        </label>
+      <label className="field">
+        Date
+        <input type="date" value={v.date} onChange={set("date")} required />
+      </label>
+      <label className="field">
+        Weigh-in
+        <select value={v.weighIn} onChange={set("weighIn")}>
+          <option value="same_day">Right before first match</option>
+          <option value="day_before">Day before</option>
+          <option value="unsure">Not sure</option>
+        </select>
+      </label>
+      <div className="grid grid-cols-2 items-end gap-3">
         <label className="field">
           Division limit (kg)
           <input inputMode="decimal" value={v.limitKg} onChange={set("limitKg")} placeholder="optional" />
-        </label>
-        <label className="field">
-          Weigh-in
-          <select value={v.weighIn} onChange={set("weighIn")}>
-            <option value="same_day">Right before first match</option>
-            <option value="day_before">Day before</option>
-            <option value="unsure">Not sure</option>
-          </select>
         </label>
         <label className="field">
           Format
