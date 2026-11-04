@@ -23,7 +23,18 @@ const num = (v: string) => {
 };
 
 /** Add or edit a competition. Editing the main one rebuilds the plan. */
-export function CompetitionForm({ initial, isMain, onDone }: { initial: CompetitionValues; isMain?: boolean; onDone?: () => void }) {
+export function CompetitionForm({
+  initial,
+  isMain,
+  onDone,
+  cancellable,
+}: {
+  initial: CompetitionValues;
+  isMain?: boolean;
+  onDone?: () => void;
+  /** Show Cancel when adding, too (editing always has it). */
+  cancellable?: boolean;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
@@ -106,7 +117,7 @@ export function CompetitionForm({ initial, isMain, onDone }: { initial: Competit
         <button className="btn btn-primary" disabled={pending}>
           {initial.id ? (isMain ? "Save and rebuild plan" : "Save") : "Add competition"}
         </button>
-        {onDone && initial.id ? (
+        {onDone && (initial.id || cancellable) ? (
           <button type="button" className="btn" onClick={onDone}>
             Cancel
           </button>

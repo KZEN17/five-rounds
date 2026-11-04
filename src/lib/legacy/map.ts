@@ -1,7 +1,7 @@
 import type { ExerciseLog, MealItem, RoundLog, SessionParams } from "@/lib/db/schema";
 import { addDays, type IsoDate, type SessionType, type TimeOfDay } from "@/lib/engine";
 
-/** The legacy app's state blob (`S` in legacy/public/index.html). Values were stored as typed text. */
+/** The original app's state blob (its `S` object). Values were stored as typed text. */
 type Text = string | number | null | undefined;
 type LegacyItem = { id: string; type: string; mins?: Text; rounds?: Text; when?: string; title?: string };
 type LegacyRound = { rpe?: Text; gas?: string; end?: Text; rec?: Text; m?: Text };
@@ -36,7 +36,7 @@ const num = (v: Text): number | null => {
 };
 const int = (v: Text) => (num(v) == null ? null : Math.round(num(v)!));
 
-// The legacy 8-week programme (legacy/public/index.html: BIKE, ROW, SIM, planItems).
+// The original app's 8-week programme (its BIKE, ROW, SIM arrays and planItems).
 const BIKE = [[30, 30], [35, 30], [35, 35], [40, 35], [40, 40], [45, 40], [45, 45], [30, 30]];
 const ROW = [3, 3, 4, 4, 5, 5, 5, 3];
 const SIM = [3, 3, 4, 4, 4, 5, 5, 3];

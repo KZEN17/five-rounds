@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FoodPanel } from "@/components/fuel/food-panel";
-import { OutlookList } from "@/components/competitions/outlook-list";
 import { WeightPanel } from "@/components/fuel/weight-panel";
 import { LinkPending } from "@/components/spinner";
 import { userTimezone } from "@/lib/actions";
@@ -140,23 +139,12 @@ export default async function FuelPage({ searchParams }: { searchParams: Promise
         <p className="hint">
           Session burn is an estimate. Logged minutes replace the planned ones.
           {input.data.nutrition.protectHardDays && d.outlook.dailyAdjustmentKcal < 0 ? " Hard days carry half the deficit; easy days carry the rest, so the week adds up the same." : ""}
-          {" "}The deficit follows your weigh-ins: it updates as your weight trend moves against each competition&apos;s limit.
-        </p>
-      </section>
-
-      <section className="panel" aria-labelledby="outlook-heading">
-        <div className="flex items-baseline justify-between gap-2">
-          <h3 id="outlook-heading">Weight outlook</h3>
-          <Link href="/competitions" className="hint underline">
-            Competitions
+          {" "}The deficit follows your weigh-ins and your{" "}
+          <Link href="/competitions" className="underline">
+            competition calendar
           </Link>
-        </div>
-        {d.outlook.comps.length ? (
-          <OutlookList comps={d.outlook.comps} drivingId={d.outlook.drivingId} />
-        ) : (
-          <p className="hint">No upcoming competitions. Add them on the Competitions page to get weight targets.</p>
-        )}
-        <p className="hint">Trend weight {d.weight.series.length ? `${d.weight.series.at(-1)!.avg} kg (7-day average)` : `${d.weight.kg} kg`}. Limits are ceilings: the app aims 0.5 kg under to allow for day-to-day swings.</p>
+          .
+        </p>
       </section>
 
       <FoodPanel date={date} isToday={date === today} logs={d.logs} recent={d.recent} foods={d.foods} meals={d.meals} />

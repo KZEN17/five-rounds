@@ -2,10 +2,7 @@
 
 Competition prep for grapplers. You sign up, enter your current fitness and your competition, and get a generated, editable plan for conditioning, strength, BJJ load, weight and calories. Then you log sessions, readiness, food and weigh-ins, and watch the trends.
 
-Next.js 16 (App Router, TypeScript) on Vercel · Neon Postgres via Drizzle · Better Auth (email magic links via Resend, plus Google) · Upstash Redis for rate limits · Serwist for the offline app shell. The original single-user app is kept in [`legacy/`](legacy/) for reference.
-
-- What we're building: [docs/BUILD_BRIEF.md](docs/BUILD_BRIEF.md)
-- How it's built: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Next.js 16 (App Router, TypeScript) on Vercel · Neon Postgres via Drizzle · Better Auth (email magic links via Resend, plus Google) · Upstash Redis for rate limits · Serwist for the offline app shell. Backups from the original single-user app can be imported (Settings → Your data, or `npm run import:legacy`).
 
 ## Local development
 

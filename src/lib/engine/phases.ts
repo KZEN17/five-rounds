@@ -3,7 +3,10 @@ import type { Phase } from "./types";
 export type PhaseSplit = {
   phases: Phase[];
   deload: boolean[];
-  /** Plans of 8 weeks or less follow the legacy 8-week shape (see docs/ARCHITECTURE.md). */
+  /**
+   * Plans of 8 weeks or less follow the original app's 8-week shape (owner's call): comp sim and
+   * intervals alternate from week 1, no deload week, and the taper returns to week-1 volume.
+   */
   shortCamp: boolean;
   taperDays: number;
 };

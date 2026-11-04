@@ -1,6 +1,6 @@
 // Finds the Upstash REST credentials whatever prefix Vercel gave them:
 // KV_REST_API_URL, UPSTASH_REDIS_REST_URL, STORAGE_KV_REST_API_URL, MYDB_KV_REST_API_URL, …
-// (ported from legacy/api/_lib/redis.js).
+// (ported from the original app's Redis helper).
 
 type Env = Record<string, string | undefined>;
 

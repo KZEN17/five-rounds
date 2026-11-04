@@ -7,7 +7,7 @@ const plan = generatePlan(zlatko, ZLATKO_TODAY);
 const day = (p: Plan, week: number, weekday: number) => p.weeks[week]!.days[weekday]!;
 const types = (p: Plan, week: number, weekday: number) => day(p, week, weekday).sessions.map((s) => s.type);
 
-// The legacy app's arrays (legacy/public/index.html): BIKE, SIM, ROW.
+// The original app's hand-written arrays: BIKE, SIM, ROW.
 const LEGACY_BIKE = [[30, 30], [35, 30], [35, 35], [40, 35], [40, 40], [45, 40], [45, 45], [30, 30]];
 const LEGACY_SATURDAY = [
   ["comp_sim", 3],

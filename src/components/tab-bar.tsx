@@ -28,6 +28,16 @@ const TABS = [
     ),
   },
   {
+    href: "/competitions",
+    label: "Comps",
+    svg: (
+      <svg {...icon}>
+        <path d="M7 4h10v5a5 5 0 0 1-10 0V4z" />
+        <path d="M17 5h3a3 3 0 0 1-3 4M7 5H4a3 3 0 0 0 3 4M9 21h6M12 14v7" />
+      </svg>
+    ),
+  },
+  {
     href: "/timer",
     label: "Timer",
     svg: (
@@ -65,7 +75,7 @@ export function TabBar() {
       aria-label="Main"
       className="fixed inset-x-0 bottom-0 z-10 flex justify-center border-t border-line bg-surface px-2 pt-1.5 pb-[calc(6px+env(safe-area-inset-bottom))]"
     >
-      <ul className="grid w-full max-w-140 grid-cols-5 gap-1">
+      <ul className="grid w-full max-w-140 grid-cols-6 gap-0.5 sm:gap-1">
         {TABS.map((tab) => {
           const active = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
           return (
@@ -73,7 +83,7 @@ export function TabBar() {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-[10px] py-1.5 text-[11px] font-semibold tracking-[0.04em] uppercase no-underline [&_svg]:size-[22px] ${
+                className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-[10px] py-1.5 text-[9px] font-semibold tracking-[0.01em] uppercase min-[360px]:text-[10px] sm:text-[11px] sm:tracking-[0.04em] no-underline [&_svg]:size-[22px] ${
                   active ? "bg-accent-soft text-accent" : "text-muted"
                 }`}
               >

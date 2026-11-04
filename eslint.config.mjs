@@ -42,5 +42,5 @@ export default defineConfig([
       ],
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "legacy/**", "drizzle/**", ".pglite/**", ".pglite-e2e/**", "playwright-report/**", "test-results/**"]),
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "drizzle/**", ".pglite/**", ".pglite-e2e/**", "playwright-report/**", "test-results/**"]),
 ]);
