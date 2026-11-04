@@ -5,6 +5,7 @@ import { toIso } from "@/lib/engine";
 import type { Database } from "./client";
 import { saveAndGenerate } from "./plan-store";
 import {
+  competitions,
   foodLogs,
   foods,
   meals,
@@ -44,6 +45,7 @@ beforeEach(async () => {
 });
 
 const TABLES: [string, OwnedTable][] = [
+  ["competitions", competitions],
   ["plan_inputs", planInputs],
   ["plans", plans],
   ["plan_sessions", planSessions],

@@ -1,7 +1,8 @@
 import { and, asc, desc, eq, gte, isNull, lte, notExists } from "drizzle-orm";
 import { generatePlan, type IsoDate, type Plan, type PlanInput, type Session } from "@/lib/engine";
 import { calendarDate } from "@/lib/time";
-import { competitions, planInputs, plans, planSessions, profiles, sessionLogs, weights, type SessionParams } from "./schema";
+import { fieldsFromInput, saveMainCompetition } from "./competition-store";
+import { planInputs, plans, planSessions, profiles, sessionLogs, weights, type SessionParams } from "./schema";
 import { RAW, type ScopedDb } from "./scoped";
 
 export type SessionRow = typeof planSessions.$inferSelect;
@@ -55,18 +56,7 @@ export async function saveAndGenerate(db: ScopedDb, input: PlanInput, today: Iso
     };
     const raw = tx[RAW];
     await raw.insert(profiles).values({ ...profile, userId: tx.userId }).onConflictDoUpdate({ target: profiles.userId, set: profile });
-    const comp = {
-      name: c.name,
-      date: c.date,
-      gi: c.gi,
-      weighInTiming: c.weighIn,
-      targetWeightKg: c.targetWeightKg,
-      matchLenSec: Math.round(c.matchMinutes * 60),
-      matches: c.matches,
-      restMin: c.restMinutes,
-      isTest: c.kind === "test",
-    };
-    await raw.insert(competitions).values({ ...comp, userId: tx.userId }).onConflictDoUpdate({ target: competitions.userId, set: comp });
+    await saveMainCompetition(tx, fieldsFromInput(c));
     // Today's weight from the answers, unless there's already a weigh-in.
     await raw.insert(weights).values({ userId: tx.userId, date: today, kg: p.weightKg }).onConflictDoNothing();
 

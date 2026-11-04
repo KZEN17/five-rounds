@@ -32,6 +32,9 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
           <div className="hint">
             days to {compName} · {shortDate(v.out.compDate)}
           </div>
+          <Link href="/competitions" className="hint underline">
+            All competitions
+          </Link>
         </div>
       </div>
 

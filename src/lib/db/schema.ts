@@ -134,22 +134,31 @@ const userRef = () =>
     .references(() => user.id, { onDelete: "cascade" });
 const day = (name: string) => date(name, { mode: "string" });
 
-/** The athlete's competition (one per user; the latest answers win). */
-export const competitions = pgTable("competitions", {
-  userId: text("user_id")
-    .primaryKey()
-    .references(() => user.id, { onDelete: "cascade" }),
-  name: text("name").notNull().default(""),
-  date: day("date").notNull(),
-  gi: text("gi", { enum: ["gi", "nogi"] }).notNull(),
-  weighInTiming: text("weigh_in_timing", { enum: ["same_day", "day_before", "unsure"] }).notNull(),
-  targetWeightKg: real("target_weight_kg"),
-  matchLenSec: integer("match_len_sec").notNull(),
-  matches: integer("matches").notNull(),
-  restMin: real("rest_min").notNull(),
-  isTest: boolean("is_test").notNull().default(false),
-  updatedAt: updatedAt(),
-});
+/** The athlete's competition calendar. One is the main competition the training plan peaks for. */
+export const competitions = pgTable(
+  "competitions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: userRef(),
+    name: text("name").notNull().default(""),
+    date: day("date").notNull(),
+    gi: text("gi", { enum: ["gi", "nogi"] }).notNull(),
+    weighInTiming: text("weigh_in_timing", { enum: ["same_day", "day_before", "unsure"] }).notNull(),
+    /** Division limit: a ceiling to be at or under at weigh-in. */
+    targetWeightKg: real("target_weight_kg"),
+    matchLenSec: integer("match_len_sec").notNull(),
+    matches: integer("matches").notNull(),
+    restMin: real("rest_min").notNull(),
+    isTest: boolean("is_test").notNull().default(false),
+    isMain: boolean("is_main").notNull().default(false),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index("competitions_user_date").on(t.userId, t.date),
+    uniqueIndex("competitions_one_main").on(t.userId).where(sql`${t.isMain}`),
+  ],
+);
 
 /** Every set of onboarding answers, versioned. Plans are generated from these. */
 export const planInputs = pgTable(

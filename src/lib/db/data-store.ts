@@ -44,7 +44,7 @@ export async function exportAll(db: ScopedDb, email: string) {
     account: { email },
     data: {
       profile: profile[0] ?? null,
-      competition: competition[0] ?? null,
+      competitions: competition,
       planInputs: inputs,
       plans: planRows,
       planSessions: sessions,
@@ -87,9 +87,13 @@ export async function importV2(db: ScopedDb, doc: ExportDoc) {
       const { userId: _u, createdAt: _c, updatedAt: _t, ...p } = d.profile;
       await saveProfile(tx, p);
     }
-    if (d.competition) {
-      const { userId: _u, updatedAt: _t, ...c } = d.competition;
-      await tx[RAW].insert(competitions).values({ ...c, userId: tx.userId }).onConflictDoUpdate({ target: competitions.userId, set: c });
+    await tx.delete(competitions);
+    // Exports from before the calendar carried a single `competition`: it was the main one.
+    const legacyOne = (d as { competition?: (typeof d.competitions)[number] | null }).competition;
+    const calendar = d.competitions ?? (legacyOne ? [{ ...legacyOne, isMain: true }] : []);
+    for (const row of calendar) {
+      const { id: _id, userId: _u, createdAt: _c, updatedAt: _t, ...c } = row;
+      await tx.insert(competitions, { ...c, isMain: Boolean(c.isMain) });
     }
     const many = async <T>(rows: T[], fn: (chunk: T[]) => Promise<unknown>) => {
       for (let i = 0; i < rows.length; i += 200) await fn(rows.slice(i, i + 200));

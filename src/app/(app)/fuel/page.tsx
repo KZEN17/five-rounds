@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FoodPanel } from "@/components/fuel/food-panel";
+import { OutlookList } from "@/components/competitions/outlook-list";
 import { WeightPanel } from "@/components/fuel/weight-panel";
 import { LinkPending } from "@/components/spinner";
 import { userTimezone } from "@/lib/actions";
 import { fuelDay } from "@/lib/db/fuel-store";
-import { activePlan, latestInput } from "@/lib/db/plan-store";
+import { latestInput } from "@/lib/db/plan-store";
 import { addDays } from "@/lib/engine";
 import { requireUser } from "@/lib/session";
-import { longDate, todayIn } from "@/lib/time";
+import { longDate, shortDate, todayIn } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Fuel" };
 
@@ -25,15 +26,21 @@ function Bar({ value, goal, tone }: { value: number; goal: number; tone: string 
 
 export default async function FuelPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { db } = await requireUser();
-  const [plan, input, tz] = await Promise.all([activePlan(db), latestInput(db), userTimezone(db)]);
+  const [input, tz] = await Promise.all([latestInput(db), userTimezone(db)]);
   const today = todayIn(tz);
   const asked = (await searchParams).date;
   const date = asked && /^\d{4}-\d{2}-\d{2}$/.test(asked) ? asked : today;
   if (!input) return null;
-  const d = await fuelDay(db, date, input.data, plan?.output);
+  const d = await fuelDay(db, date, input.data);
   const t = d.target;
   const left = t.target - d.eaten.kcal;
-  const goalWarnings = plan?.output.nutrition.warnings.filter((w) => w.code.startsWith("cut-") || w.code.startsWith("gain-")) ?? [];
+  const goalWarnings = d.outlook.warnings;
+  const driving = d.outlook.comps.find((c) => c.id === d.outlook.drivingId);
+  const adjustLabel = d.outlook.inFinalWeek
+    ? `Final week before ${driving?.name || "your weigh-in"}: maintenance`
+    : driving
+      ? `Aiming for ${driving.aimKg} kg by ${driving.name || "your competition"} (${shortDate(driving.weighInDate)})`
+      : "On weight: maintenance";
 
   return (
     <>
@@ -122,7 +129,7 @@ export default async function FuelPage({ searchParams }: { searchParams: Promise
           )}
           <dt className="border-t border-line pt-1 font-semibold">Maintenance</dt>
           <dd className="num border-t border-line pt-1 text-right font-semibold">{n0(t.maintenance)}</dd>
-          <dt>{t.adjustment < 0 ? "Deficit" : t.adjustment > 0 ? "Surplus" : "Goal adjustment"}</dt>
+          <dt>{adjustLabel}</dt>
           <dd className="num text-right">
             {t.adjustment < 0 ? "−" : t.adjustment > 0 ? "+" : ""}
             {n0(Math.abs(t.adjustment))}
@@ -132,8 +139,24 @@ export default async function FuelPage({ searchParams }: { searchParams: Promise
         </dl>
         <p className="hint">
           Session burn is an estimate. Logged minutes replace the planned ones.
-          {plan?.output.nutrition.protectHardDays && plan.output.nutrition.goal === "cut" ? " Hard days carry half the deficit; easy days carry the rest, so the week adds up the same." : ""}
+          {input.data.nutrition.protectHardDays && d.outlook.dailyAdjustmentKcal < 0 ? " Hard days carry half the deficit; easy days carry the rest, so the week adds up the same." : ""}
+          {" "}The deficit follows your weigh-ins: it updates as your weight trend moves against each competition&apos;s limit.
         </p>
+      </section>
+
+      <section className="panel" aria-labelledby="outlook-heading">
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 id="outlook-heading">Weight outlook</h3>
+          <Link href="/competitions" className="hint underline">
+            Competitions
+          </Link>
+        </div>
+        {d.outlook.comps.length ? (
+          <OutlookList comps={d.outlook.comps} drivingId={d.outlook.drivingId} />
+        ) : (
+          <p className="hint">No upcoming competitions. Add them on the Competitions page to get weight targets.</p>
+        )}
+        <p className="hint">Trend weight {d.weight.series.length ? `${d.weight.series.at(-1)!.avg} kg (7-day average)` : `${d.weight.kg} kg`}. Limits are ceilings: the app aims 0.5 kg under to allow for day-to-day swings.</p>
       </section>
 
       <FoodPanel date={date} isToday={date === today} logs={d.logs} recent={d.recent} foods={d.foods} meals={d.meals} />

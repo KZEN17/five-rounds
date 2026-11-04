@@ -18,6 +18,7 @@ export const config = {
     "/fuel/:path*",
     "/progress/:path*",
     "/settings/:path*",
+    "/competitions/:path*",
     "/onboarding/:path*",
   ],
 };

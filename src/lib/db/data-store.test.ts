@@ -6,7 +6,7 @@ import { isLegacyState, mapLegacy } from "@/lib/legacy/map";
 import type { Database } from "./client";
 import { exportAll, importLegacy, importV2 } from "./data-store";
 import { saveAndGenerate } from "./plan-store";
-import { foodLogs, meals, planSessions, profiles, readiness, sessionLogs, user, weekMarks, weights } from "./schema";
+import { competitions, foodLogs, meals, planSessions, profiles, readiness, sessionLogs, user, weekMarks, weights } from "./schema";
 import { scoped, type ScopedDb } from "./scoped";
 import { createTestDb } from "./testing";
 
@@ -93,7 +93,7 @@ describe("export and import (v2)", () => {
     const doc = JSON.parse(JSON.stringify(await exportAll(me, "z@example.com")));
     const other = scoped(db, "other");
     await importV2(other, doc);
-    for (const t of [planSessions, sessionLogs, foodLogs, meals, weights, readiness]) {
+    for (const t of [competitions, planSessions, sessionLogs, foodLogs, meals, weights, readiness]) {
       expect((await other.select(t)).length).toBe((await me.select(t)).length);
     }
     // Logs still point at their (re-issued) sessions in the new account.
@@ -102,5 +102,16 @@ describe("export and import (v2)", () => {
     expect(linked.every((l) => ids.has(l.sessionId!))).toBe(true);
     // The original account is untouched.
     expect((await me.select(planSessions)).length).toBeGreaterThan(0);
+  });
+
+  it("still restores exports made before the calendar (a single competition)", async () => {
+    await saveAndGenerate(me, zlatko, "2026-01-05", "UTC");
+    const doc = JSON.parse(JSON.stringify(await exportAll(me, "z@example.com")));
+    const [only] = doc.data.competitions;
+    delete doc.data.competitions;
+    doc.data.competition = { ...only, isMain: undefined };
+    const other = scoped(db, "other");
+    await importV2(other, doc);
+    expect(await other.select(competitions)).toEqual([expect.objectContaining({ name: "Spring Open", isMain: true })]);
   });
 });

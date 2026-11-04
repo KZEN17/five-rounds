@@ -79,6 +79,21 @@ test("sign in → onboarding → plan visible → log a session", async ({ page 
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await page.screenshot({ path: "test-results/screens/fuel.png", fullPage: true });
 
+  // Competition calendar: a second competition with a weight limit drives Fuel's target.
+  await page.goto("/competitions");
+  await expect(page.getByRole("heading", { name: "Competitions" })).toBeVisible();
+  await page.getByText("Add a competition").click();
+  await page.getByLabel("Name").fill("Club open");
+  await page.getByLabel("Date").fill(new Date(Date.now() + 40 * 86_400_000).toISOString().slice(0, 10));
+  await page.getByLabel("Division limit (kg)").fill("79");
+  await page.getByRole("button", { name: "Add competition" }).click();
+  await expect(page.getByText("Club open").first()).toBeVisible();
+  await page.screenshot({ path: "test-results/screens/competitions.png", fullPage: true });
+  await page.getByRole("link", { name: "Fuel", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Weight outlook" })).toBeVisible();
+  await expect(page.getByText("This one sets today's calories.")).toBeVisible();
+  await expect(page.getByText(/Aiming for 78\.5 kg by Club open/)).toBeVisible();
+
   // Import a backup from the old app, then see it on Progress.
   await page.goto("/settings/data");
   await page.getByLabel("…or paste it here").fill(JSON.stringify(legacyState));

@@ -9,3 +9,4 @@ export { mmss, roundsMinutes } from "./sessions";
 export { mobilitySession, strengthSession, TEMPLATES } from "./strength";
 export * from "./types";
 export { contextFor, sessionTemplate, type TemplateContext } from "./templates";
+export * from "./outlook";
