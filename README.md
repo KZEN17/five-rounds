@@ -39,6 +39,8 @@ Sign in with any email and tick 18+. Without `AUTH_RESEND_KEY`, the sign-in link
 | `SIGNUP_MODE` | all | `open` or `invite` (only emails in the `invites` table, plus `OWNER_EMAIL`, can create accounts). |
 | `OWNER_EMAIL` | all | The owner's email: always allowed to sign up; target of the legacy import. |
 | `AUTH_URL` | optional | Overrides the app URL. Defaults to the Vercel branch URL on previews and the production URL in production. |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Production | Phone notifications. Generate once with `npx web-push generate-vapid-keys`. Without them the app hides the push option. |
+| `CRON_SECRET` | Production | Protects the daily report job; Vercel sends it to the cron route automatically. `openssl rand -base64 32`. |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | already set | Upstash Redis, used for rate limits. Any Vercel prefix works. Without them rate limiting is off. |
 
 ## Deploying on the existing Vercel project
@@ -64,6 +66,10 @@ Pushes to `next-app` create **Preview** deployments. `vercel.json` declares `"fr
 7. **Ship:** merge `next-app` into `main` (`git merge --no-ff`), push, tag `v2.0.0`. Production deploys on the same domain.
 
 **Rollback:** in Vercel, promote the previous production deployment (instant), or `git revert -m 1 <merge-sha>` and push. The old app's Redis data is never modified by the new app or the import.
+
+## Reports and notifications
+
+Every morning a Vercel cron (`vercel.json`, 05:00 UTC) builds each user's report for the day before and, on Mondays, the weekly recap. It pushes them to every device that turned notifications on, and emails the recap to users who asked (Settings → Notifications). Reports are also shown on Today and under /reports. On iPhone, notifications only work in the app added to the Home Screen.
 
 ## Known limits
 

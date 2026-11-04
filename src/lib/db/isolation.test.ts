@@ -6,6 +6,8 @@ import type { Database } from "./client";
 import { saveAndGenerate } from "./plan-store";
 import {
   competitions,
+  pushSubscriptions,
+  reports,
   foodLogs,
   foods,
   meals,
@@ -41,11 +43,15 @@ beforeEach(async () => {
   await a.insert(meals, { name: "Bowl", items: [], portions: 1 });
   await a.insert(foodLogs, { date: today, name: "Bowl", kcal: 500 });
   await a.foods.insert({ name: "Alice's bar", kcal: 400, p: 30, c: 40, f: 10 });
+  await a.insert(reports, { kind: "daily", periodStart: today, payload: { kind: "daily", periodStart: today, periodEnd: today, tone: "good", headline: "x", highlights: [], concerns: [], nextStep: "", pace: null } });
+  await a.insert(pushSubscriptions, { endpoint: "https://push.example/alice", p256dh: "p".repeat(20), auth: "a".repeat(10), userAgent: null });
   await db.insert(foods).values({ name: "Rice", kcal: 130, p: 2.7, c: 28, f: 0.3 });
 });
 
 const TABLES: [string, OwnedTable][] = [
   ["competitions", competitions],
+  ["reports", reports],
+  ["push_subscriptions", pushSubscriptions],
   ["plan_inputs", planInputs],
   ["plans", plans],
   ["plan_sessions", planSessions],

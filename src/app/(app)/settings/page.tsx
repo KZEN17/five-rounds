@@ -25,6 +25,13 @@ export default async function SettingsPage() {
           Devices and watch guide
         </Link>
       </section>
+      <section className="panel" aria-labelledby="notify-heading">
+        <h3 id="notify-heading">Notifications</h3>
+        <p className="hint">A morning report on your phone and a weekly recap by email.</p>
+        <Link href="/settings/notifications" className="btn self-start">
+          Notifications
+        </Link>
+      </section>
       <section className="panel" aria-labelledby="data-heading">
         <h3 id="data-heading">Your data</h3>
         <p className="hint">Download everything as JSON, restore from an export, or bring in a backup from the old Five Rounds app.</p>

@@ -15,7 +15,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { Plan, PlanInput, Session, SessionType } from "@/lib/engine";
+import type { Plan, PlanInput, Report, Session, SessionType } from "@/lib/engine";
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const updatedAt = () =>
@@ -122,6 +122,7 @@ export const profiles = pgTable("profiles", {
   timezone: text("timezone").notNull().default("UTC"),
   z2CeilingBpm: integer("z2_ceiling_bpm"),
   device: text("device", { enum: ["apple", "garmin", "none"] }).notNull().default("none"),
+  notifyEmailWeekly: boolean("notify_email_weekly").notNull().default(false),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -356,4 +357,40 @@ export const foodLogs = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("food_logs_user_date").on(t.userId, t.date), unique("food_logs_external").on(t.userId, t.externalId)],
+);
+
+/* ---------- Reports and notifications ---------- */
+
+/** Daily and weekly reports, generated once per period and kept as a history. */
+export const reports = pgTable(
+  "reports",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: userRef(),
+    kind: text("kind", { enum: ["daily", "weekly"] }).notNull(),
+    periodStart: day("period_start").notNull(),
+    payload: jsonb("payload").$type<Report>().notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    pushedAt: timestamp("pushed_at", { withTimezone: true }),
+    emailedAt: timestamp("emailed_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [unique("reports_one_per_period").on(t.userId, t.kind, t.periodStart), index("reports_user_period").on(t.userId, t.periodStart)],
+);
+
+/** Web Push subscriptions, one per device. */
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: userRef(),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    userAgent: text("user_agent"),
+    failureCount: integer("failure_count").notNull().default(0),
+    lastSuccessAt: timestamp("last_success_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("push_subscriptions_user").on(t.userId)],
 );

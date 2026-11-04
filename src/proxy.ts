@@ -19,6 +19,7 @@ export const config = {
     "/progress/:path*",
     "/settings/:path*",
     "/competitions/:path*",
+    "/reports/:path*",
     "/onboarding/:path*",
   ],
 };

@@ -29,6 +29,13 @@
       "when": 1793782758836,
       "tag": "0003_competition_calendar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793798422013,
+      "tag": "0004_reports_and_push",
+      "breakpoints": true
     }
   ]
 }

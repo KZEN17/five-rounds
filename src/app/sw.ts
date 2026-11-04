@@ -23,3 +23,34 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+// Morning reports: show the notification, and open (or focus) the app on tap.
+self.addEventListener("push", (event) => {
+  const data = (() => {
+    try {
+      return event.data?.json() as { title?: string; body?: string; url?: string } | undefined;
+    } catch {
+      return { body: event.data?.text() };
+    }
+  })();
+  event.waitUntil(
+    self.registration.showNotification(data?.title ?? "Five Rounds", {
+      body: data?.body ?? "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: data?.url ?? "/today" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data as { url?: string } | undefined)?.url ?? "/today", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      const open = clients.find((c) => c.url.startsWith(self.location.origin));
+      if (open) return open.navigate(url).then((c) => c?.focus());
+      return self.clients.openWindow(url);
+    }),
+  );
+});

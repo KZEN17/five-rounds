@@ -48,3 +48,25 @@ export function mailSenderFromEnv(env: NodeJS.ProcessEnv = process.env): MailSen
     console.info(`\n[dev mail] Sign-in link for ${to}:\n${url}\n`);
   };
 }
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** The weekly recap email, via the same Resend setup as sign-in. Null when email isn't configured. */
+export function reportEmailSenderFromEnv(appUrl: string, env: NodeJS.ProcessEnv = process.env) {
+  const key = env.AUTH_RESEND_KEY;
+  const from = env.EMAIL_FROM;
+  if (!key || !from) return null;
+  const resend = new Resend(key);
+  return async (to: string, report: import("@/lib/engine").Report) => {
+    const list = (items: string[], mark: string) =>
+      items.map((i) => `<li style="margin:4px 0">${mark} ${esc(i)}</li>`).join("");
+    const html = `<h2 style="font-family:Arial,sans-serif;margin:0 0 8px">${esc(report.headline)}</h2>
+<ul style="list-style:none;padding:0;margin:0 0 12px;font-family:Arial,sans-serif">${list(report.highlights, "✓")}${list(report.concerns, "•")}</ul>
+<p style="font-family:Arial,sans-serif"><b>${esc(report.nextStep)}</b></p>
+<p><a href="${esc(appUrl)}/reports" style="display:inline-block;padding:10px 16px;border-radius:10px;background:#6b3fb0;color:#fff;text-decoration:none;font-family:Arial,sans-serif">Open Five Rounds</a></p>
+<p style="color:#6a6578;font-size:12px;font-family:Arial,sans-serif">You get this because weekly emails are on in Settings → Notifications.</p>`;
+    const text = [report.headline, "", ...report.highlights.map((h) => `✓ ${h}`), ...report.concerns.map((c) => `• ${c}`), "", report.nextStep, "", `${appUrl}/reports`].join("\n");
+    const { error } = await resend.emails.send({ from, to, subject: `Five Rounds: ${report.headline}`, html, text });
+    if (error) throw new Error(`Resend couldn't send the weekly email: ${error.message}`);
+  };
+}

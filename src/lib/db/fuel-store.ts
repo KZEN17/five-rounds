@@ -77,19 +77,14 @@ function adjustmentFor(outlook: WeightOutlook, date: IsoDate, hardByDate: Map<Is
   return weekAdjustments(days, outlook.dailyAdjustmentKcal, protect)[date] ?? 0;
 }
 
-/** Everything the Fuel screen shows for one date. */
-export async function fuelDay(db: ScopedDb, date: IsoDate, input: PlanInput) {
+/** The day's calorie target, what was eaten, and the weight outlook: the core of Fuel and of reports. */
+export async function dayNumbers(db: ScopedDb, date: IsoDate, input: PlanInput) {
   const monday = mondayOf(date);
-  const [weekRows, logs, recentLogs, savedMeals, foodRows, { trend, calendar, outlook }] = await Promise.all([
+  const [weekRows, logs, { trend, calendar, outlook }] = await Promise.all([
     sessionsBetween(db, monday, addDays(monday, 6)),
     db.select(foodLogs, eq(foodLogs.date, date)).orderBy(asc(foodLogs.createdAt)),
-    db.select(foodLogs).orderBy(desc(foodLogs.createdAt)).limit(200),
-    db.select(meals).orderBy(asc(meals.name)),
-    db.foods.visible().orderBy(asc(foods.name)),
     outlookFor(db, date, input.profile.weightKg),
   ]);
-  const kg = trend.kg;
-
   const live = weekRows.filter((r) => !r.session.deletedAt);
   const hardByDate = new Map<IsoDate, boolean>();
   for (const r of live) if (r.session.params.intensity === "hard") hardByDate.set(r.session.date, true);
@@ -97,17 +92,28 @@ export async function fuelDay(db: ScopedDb, date: IsoDate, input: PlanInput) {
 
   const target = dayTarget({
     profile: input.profile,
-    weightKg: kg,
+    weightKg: trend.kg,
     activityFactor: input.nutrition.activityFactor,
     proteinGPerKg: input.nutrition.proteinGPerKg,
     sessions: today.map((r) => ({ ...r.session.params, type: r.session.type, title: r.session.title, loggedMinutes: r.log?.minutes ?? null })),
     adjustmentKcal: adjustmentFor(outlook, date, hardByDate, input.nutrition.protectHardDays),
   });
-
   const eaten = logs.reduce(
     (a, x) => ({ kcal: a.kcal + x.kcal, p: a.p + (x.p ?? 0), c: a.c + (x.c ?? 0), f: a.f + (x.f ?? 0) }),
     { kcal: 0, p: 0, c: 0, f: 0 },
   );
+  return { target, eaten, logs, trend, calendar, outlook };
+}
+
+/** Everything the Fuel screen shows for one date. */
+export async function fuelDay(db: ScopedDb, date: IsoDate, input: PlanInput) {
+  const [{ target, eaten, logs, trend, calendar, outlook }, recentLogs, savedMeals, foodRows] = await Promise.all([
+    dayNumbers(db, date, input),
+    db.select(foodLogs).orderBy(desc(foodLogs.createdAt)).limit(200),
+    db.select(meals).orderBy(asc(meals.name)),
+    db.foods.visible().orderBy(asc(foods.name)),
+  ]);
+  const kg = trend.kg;
 
   const seen = new Set<string>();
   const recent = recentLogs

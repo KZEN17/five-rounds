@@ -95,6 +95,13 @@ test("sign in → onboarding → plan visible → log a session", async ({ page 
   await page.getByRole("link", { name: "Fuel", exact: true }).click();
   await expect(page.getByText(/Aiming for 78\.5 kg by Club open/)).toBeVisible();
 
+  // Notifications and reports pages (push isn't configured in tests, so it says so).
+  await page.goto("/settings/notifications");
+  await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
+  await expect(page.getByText("Phone notifications aren't set up on the server yet.")).toBeVisible();
+  await page.goto("/reports");
+  await expect(page.getByRole("heading", { name: "Reports" })).toBeVisible();
+
   // Import a backup from the old app, then see it on Progress.
   await page.goto("/settings/data");
   await page.getByLabel("…or paste it here").fill(JSON.stringify(legacyState));

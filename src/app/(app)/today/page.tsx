@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DayList } from "@/components/plan/day-list";
+import { ReportCard } from "@/components/reports/report-card";
 import { ReadinessBanner, ReadinessCheckIn } from "@/components/today/readiness";
+import { ensureDailyReport, ensureWeeklyReport } from "@/lib/db/report-store";
 import { readinessFor } from "@/lib/db/readiness-store";
-import { PHASE_LABEL } from "@/lib/engine";
+import { addDays, mondayOf, PHASE_LABEL, weekdayOf } from "@/lib/engine";
 import { loadPlan } from "@/lib/plan-view";
 import { requireUser } from "@/lib/session";
 import { longDate } from "@/lib/time";
@@ -13,7 +15,11 @@ export const metadata: Metadata = { title: "Today" };
 export default async function TodayPage() {
   const { db } = await requireUser();
   const v = await loadPlan(db);
-  const r = await readinessFor(db, v.today, v.input);
+  const [r, yesterday, lastWeek] = await Promise.all([
+    readinessFor(db, v.today, v.input),
+    ensureDailyReport(db, addDays(v.today, -1), v.input),
+    weekdayOf(v.today) <= 1 ? ensureWeeklyReport(db, addDays(mondayOf(v.today), -7), v.input) : null,
+  ]);
   const w = v.out.weeks[v.currentWeek - 1]!;
   return (
     <>
@@ -28,6 +34,8 @@ export default async function TodayPage() {
           <b className="num text-lg text-fg">{Math.max(0, v.daysToComp)}</b> days to go
         </div>
       </div>
+      {lastWeek ? <ReportCard report={lastWeek.payload} compact /> : null}
+      {yesterday ? <ReportCard report={yesterday.payload} compact showLink /> : null}
       <ReadinessCheckIn
         entry={r.entry}
         flags={r.readiness.flags}
