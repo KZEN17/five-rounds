@@ -34,7 +34,7 @@ INSERT INTO "foods" ("name", "kcal", "p", "c", "f", "category", "needs_review") 
   ('Dan milks cheese', 195, 15, 4, 12.1, 'Protein', false),
   ('Sheep cheese', 275, 16, 1.1, 27, 'Protein', false),
   ('Feta Cheese', 264, 14, 4.1, 21, 'Protein', false),
-  ('Whey Protein Powder', 400, 74, 8, 6, 'Protein', false),
+  ('Whey Protein Powder', 400, 83.3, 8, 6, 'Protein', false),
   ('Tofu', 76, 8, 1.9, 4.8, 'Protein', false),
   ('Tempeh', 193, 19, 9, 11, 'Protein', false),
   ('Lentils (cooked)', 116, 9, 20, 0.4, 'Protein', false),
