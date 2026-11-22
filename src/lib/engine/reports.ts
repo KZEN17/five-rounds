@@ -40,6 +40,8 @@ export type DayFacts = {
   readinessFlags: string[];
   /** Titles of the next day's sessions, for the next step. */
   nextPlan: string[];
+  /** Lifts that beat their previous best estimated max, e.g. "Back squat 100 kg × 5". */
+  newBests?: string[];
 };
 
 export type WeekFacts = {
@@ -118,6 +120,11 @@ export function dailyReport(f: DayFacts, pace: PaceFacts, previousRequired: numb
   } else {
     score -= 2;
     concerns.push(`None of the ${f.planned} planned sessions were logged (${f.missed.join(", ")}).`);
+  }
+
+  if (f.newBests?.length) {
+    score += 1;
+    highlights.push(`New best: ${f.newBests.join(", ")}.`);
   }
 
   if (!f.food.logged) {

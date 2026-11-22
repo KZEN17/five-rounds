@@ -22,7 +22,20 @@ export type TimeOfDay = "morning" | "midday" | "evening";
 /** Finer kind inside a type: ATG strength, threshold intervals, a taper primer. */
 export type Variant = "atg" | "threshold" | "primer";
 
-export type Exercise = { name: string; prescription: string; notes?: string };
+/** Movement pattern: what an exercise can be swapped for. */
+export type Pattern = "squat" | "hinge" | "push_h" | "push_v" | "pull_h" | "pull_v" | "single_leg" | "core" | "power" | "prehab";
+
+export type Exercise = {
+  name: string;
+  prescription: string;
+  notes?: string;
+  /** Structured targets, for set-by-set logging of gym work. */
+  sets?: number;
+  reps?: number;
+  pattern?: Pattern;
+  /** kg to add next time once every rep is hit. */
+  increment?: number;
+};
 
 export type Session = {
   type: SessionType;

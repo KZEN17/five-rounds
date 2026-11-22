@@ -1,7 +1,7 @@
 import { daysBetween, type IsoDate } from "./dates";
 import type { PlanInput } from "./input";
 import * as S from "./sessions";
-import { mobilitySession, strengthSession } from "./strength";
+import { atgPrehabSession, mobilitySession, strengthSession } from "./strength";
 import type { Modality, Phase, PlanDay, Session, Warning } from "./types";
 
 export type HardKind = "comp_sim" | "intervals" | "threshold";
@@ -23,6 +23,8 @@ export type WeekParams = {
   /** Minutes for `n` aerobic sessions this week, or at taper volume. */
   aerobic: (n: number, taper: boolean) => number[];
   strengthCount: number;
+  /** Strength sessions placed in earlier weeks: keeps gym A/B alternating across weeks. */
+  strengthOffset: number;
   intervalModality: Modality;
   aerobicModality: Modality;
 };
@@ -41,7 +43,7 @@ export function spread(candidates: readonly number[], k: number): number[] {
 }
 
 /** Lays out one week: anchors, hard sessions, rest day, easy aerobic, then strength. */
-export function scheduleWeek(p: WeekParams): { days: PlanDay[]; warnings: Warning[] } {
+export function scheduleWeek(p: WeekParams): { days: PlanDay[]; warnings: Warning[]; strengthPlaced: number } {
   const { input } = p;
   const warnings: Warning[] = [];
   const warn = (code: string, message: string) => warnings.push({ code, message });
@@ -121,7 +123,8 @@ export function scheduleWeek(p: WeekParams): { days: PlanDay[]; warnings: Warnin
   const restSlot = empty.find((s) => s.weekday === 6) ?? empty[empty.length - 1];
   if (restSlot) {
     restSlot.rest = true;
-    restSlot.sessions.push(mobilitySession(input.strength.style), S.walk());
+    const prehab = input.strength.prehab === "atg" && input.strength.style !== "atg";
+    restSlot.sessions.push(prehab ? atgPrehabSession() : mobilitySession(input.strength.style), S.walk());
   } else if (fullWeek) {
     warn("no-rest-day", "Every day has training. Keep at least one full rest or recovery-walk day each week.");
   }
@@ -161,20 +164,27 @@ export function scheduleWeek(p: WeekParams): { days: PlanDay[]; warnings: Warnin
   if (strengthDays.length < p.strengthCount && fullWeek && p.phase !== "taper") {
     warn("strength-dropped", "Not every strength session fits around your training this week. The second one is dropped first.");
   }
-  for (const d of strengthDays) {
+  const prehab = input.strength.prehab === "atg" && style !== "atg" ? "atg" : "none";
+  strengthDays.forEach((d, i) => {
     slots[d]!.sessions.push(
-      strengthSession(style, p.phase, input.strength.sessionMinutes, input.strength.customExercises, { deload: p.deload }),
+      strengthSession(style, p.phase, input.strength.sessionMinutes, input.strength.customExercises, {
+        deload: p.deload,
+        workout: p.strengthOffset + i,
+        prehab,
+      }),
     );
-  }
-  // ATG keeps its usual days as mobility when strength steps down (peak, taper).
+  });
+  // ATG keeps its usual days when strength steps down (peak, taper): as mobility for ATG,
+  // as ATG prehab next to another style.
   const usual = Math.min(2, input.strength.daysPerWeek);
-  if (style === "atg" && strengthDays.length < usual) {
+  if ((style === "atg" || prehab === "atg") && strengthDays.length < usual) {
     const rest = spread(
       ranked.map((s) => s.weekday).filter((d) => !strengthDays.includes(d)),
       usual - strengthDays.length,
     );
-    for (const d of rest) slots[d]!.sessions.push(mobilitySession(style));
-  } else if (p.phase === "taper" && style !== "custom" && input.strength.daysPerWeek > 0) {
+    for (const d of rest) slots[d]!.sessions.push(style === "atg" ? mobilitySession(style) : atgPrehabSession());
+  }
+  if (p.phase === "taper" && style !== "custom" && style !== "atg" && input.strength.daysPerWeek > 0) {
     const primerDay = ranked.find((s) => toComp(s.date) >= 3 && toComp(s.date) <= 6);
     if (primerDay) {
       primerDay.sessions.push(strengthSession(style, p.phase, input.strength.sessionMinutes, [], { primer: true }));
@@ -189,6 +199,7 @@ export function scheduleWeek(p: WeekParams): { days: PlanDay[]; warnings: Warnin
       rest: s.rest,
     })),
     warnings,
+    strengthPlaced: strengthDays.length,
   };
 }
 

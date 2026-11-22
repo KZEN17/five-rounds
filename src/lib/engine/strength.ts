@@ -6,7 +6,7 @@ type Block = "general" | "specific" | "peak" | "primer";
 const e = (name: string, prescription: string, notes?: string): Exercise => (notes ? { name, prescription, notes } : { name, prescription });
 
 /** Exercise library by style and phase. Users can swap any exercise inside a session. */
-export const TEMPLATES: Record<Exclude<StrengthStyle, "custom">, Record<Block, Exercise[]>> = {
+export const TEMPLATES: Record<Exclude<StrengthStyle, "custom" | "barbell">, Record<Block, Exercise[]>> = {
   atg: {
     general: [
       e("Tibialis raises", "2 × 20"),
@@ -37,30 +37,6 @@ export const TEMPLATES: Record<Exclude<StrengthStyle, "custom">, Record<Block, E
       e("ATG split squat", "2 × 5 / side", "Bodyweight only."),
       e("Dead hang", "2 × 20 s"),
     ],
-  },
-  barbell: {
-    general: [
-      e("Back squat", "4 × 5"),
-      e("Romanian deadlift", "3 × 6"),
-      e("Overhead or bench press", "4 × 5"),
-      e("Barbell row", "4 × 6"),
-      e("Pull-ups", "3 × 6"),
-      e("Copenhagen plank", "2 × 20 s / side"),
-    ],
-    specific: [
-      e("Back squat", "3 × 3", "Fast out of the hole."),
-      e("Trap-bar deadlift", "3 × 4"),
-      e("Push press", "3 × 3"),
-      e("Barbell row", "3 × 5"),
-      e("Jump squat", "3 × 3", "Light. Maximum intent."),
-    ],
-    peak: [
-      e("Back squat", "2 × 2", "Moderate load, crisp reps."),
-      e("Romanian deadlift", "2 × 3"),
-      e("Overhead press", "2 × 3"),
-      e("Pull-ups", "2 × 5"),
-    ],
-    primer: [e("Back squat", "2 × 2", "Light."), e("Box jump", "2 × 3"), e("Mobility flow", "10 min")],
   },
   kettlebell: {
     general: [
@@ -107,6 +83,82 @@ export const TEMPLATES: Record<Exclude<StrengthStyle, "custom">, Record<Block, E
   },
 };
 
+/** A structured gym lift: sets × reps with a load step for progression. */
+const lift = (name: string, sets: number, reps: number, pattern: Exercise["pattern"], increment?: number, notes?: string): Exercise => ({
+  name,
+  prescription: `${sets} × ${reps}`,
+  sets,
+  reps,
+  ...(pattern ? { pattern } : {}),
+  ...(increment ? { increment } : {}),
+  ...(notes ? { notes } : {}),
+});
+
+/**
+ * Classic gym for grapplers: two full-body workouts, A and B, alternating. Heavier strength
+ * early (3–5 × 3–6), more power and fewer reps in specific prep, a short moderate session at
+ * peak, and only a light primer in the taper.
+ */
+export const GYM: Record<Block, [Exercise[], Exercise[]]> = {
+  general: [
+    [
+      lift("Back squat", 4, 5, "squat", 5, "RPE 7–8: two or three reps left in the tank."),
+      lift("Bench press", 4, 5, "push_h", 2.5),
+      lift("Romanian deadlift", 3, 6, "hinge", 5),
+      lift("Pull-ups", 3, 6, "pull_v", 2.5, "Add weight once 3 × 8 is easy."),
+      // A timed hold: ticked off, not logged as kg × reps.
+      { name: "Copenhagen plank", prescription: "2 × 20 s / side", pattern: "core" },
+    ],
+    [
+      lift("Deadlift", 4, 4, "hinge", 5),
+      lift("Overhead press", 4, 5, "push_v", 2.5),
+      { ...lift("Bulgarian split squat", 3, 6, "single_leg", 2.5), prescription: "3 × 6 / side" },
+      lift("Barbell row", 4, 6, "pull_h", 2.5),
+      lift("Hanging knee raise", 3, 10, "core"),
+    ],
+  ],
+  specific: [
+    [
+      lift("Back squat", 3, 3, "squat", 5, "Fast out of the hole."),
+      lift("Bench press", 3, 3, "push_h", 2.5),
+      lift("Box jump", 3, 3, "power", undefined, "Full recovery between jumps."),
+      lift("Pull-ups", 3, 5, "pull_v", 2.5),
+      { ...lift("Pallof press", 2, 10, "core"), prescription: "2 × 10 / side" },
+    ],
+    [
+      lift("Deadlift", 3, 3, "hinge", 5),
+      lift("Push press", 3, 3, "push_v", 2.5),
+      lift("Barbell row", 3, 5, "pull_h", 2.5),
+      { ...lift("Split squat", 2, 5, "single_leg", 2.5), prescription: "2 × 5 / side" },
+      lift("Med-ball slam", 3, 5, "power"),
+    ],
+  ],
+  peak: [
+    [lift("Back squat", 2, 2, "squat", undefined, "Moderate load, crisp reps. Nothing heavy."), lift("Bench press", 2, 3, "push_h"), lift("Pull-ups", 2, 5, "pull_v")],
+    [lift("Deadlift", 2, 2, "hinge", undefined, "Moderate load, crisp reps. Nothing heavy."), lift("Push press", 2, 2, "push_v"), lift("Barbell row", 2, 5, "pull_h")],
+  ],
+  primer: [
+    [lift("Back squat", 2, 2, "squat", undefined, "Light."), lift("Box jump", 2, 3, "power"), lift("Push-ups", 1, 10, "push_h")],
+    [lift("Back squat", 2, 2, "squat", undefined, "Light."), lift("Box jump", 2, 3, "power"), lift("Push-ups", 1, 10, "push_h")],
+  ],
+};
+
+/** ATG prehab: knees, hips and back, on easy days next to gym training. */
+const ATG_PREHAB: Exercise[] = [
+  e("Tibialis raises", "2 × 20"),
+  e("ATG split squat", "2 × 8 / side", "Bodyweight, slow, knee past toes."),
+  e("Jefferson curl", "2 × 8", "Very light."),
+  e("Copenhagen plank", "2 × 20 s / side"),
+  e("Backwards walk", "3 min"),
+];
+
+const ATG_WARMUP: Exercise = {
+  name: "ATG warm-up",
+  prescription: "10 min",
+  notes: "Tibialis raises, ATG split squats, Copenhagen plank.",
+  pattern: "prehab",
+};
+
 function block(phase: Phase): Block {
   if (phase === "base" || phase === "general") return "general";
   if (phase === "specific") return "specific";
@@ -116,7 +168,7 @@ function block(phase: Phase): Block {
 
 const STYLE_NAME: Record<StrengthStyle, string> = {
   atg: "ATG",
-  barbell: "Barbell",
+  barbell: "Gym",
   kettlebell: "Kettlebell",
   bodyweight: "Bodyweight",
   custom: "Your exercises",
@@ -127,29 +179,52 @@ export function strengthSession(
   phase: Phase,
   minutes: number,
   customExercises: readonly string[],
-  opts: { primer?: boolean; deload?: boolean } = {},
+  opts: { primer?: boolean; deload?: boolean; workout?: number; prehab?: "none" | "atg" } = {},
 ): Session {
   const which = opts.primer ? "primer" : block(phase);
-  const exercises =
+  const ab = (opts.workout ?? 0) % 2;
+  let exercises: Exercise[] =
     style === "custom"
       ? customExercises.map((name) => e(name, "As you planned"))
-      : TEMPLATES[style][which].map((x) => ({ ...x }));
+      : style === "barbell"
+        ? GYM[which][ab]!.map((x) => ({ ...x }))
+        : TEMPLATES[style][which].map((x) => ({ ...x }));
+  if (opts.deload) {
+    exercises = exercises.map((x) => (x.sets && x.sets > 1 ? { ...x, sets: x.sets - 1, prescription: x.prescription.replace(/^\d+/, String(x.sets - 1)) } : x));
+  }
+  if (opts.prehab === "atg" && style !== "atg" && !opts.primer) exercises = [{ ...ATG_WARMUP }, ...exercises];
   const short = which === "peak" || which === "primer";
+  const label = style === "barbell" && !opts.primer ? `Gym ${ab === 0 ? "A" : "B"}` : `Strength (${STYLE_NAME[style]})`;
   return {
     type: "strength",
-    title: opts.primer ? `Primer (${STYLE_NAME[style]})` : `Strength (${STYLE_NAME[style]})`,
+    title: opts.primer ? `Primer (${STYLE_NAME[style]})` : label,
     minutes: short ? Math.min(minutes, 30) : minutes,
     intensity: which === "primer" ? "easy" : "moderate",
     modality: style === "atg" || style === "bodyweight" ? "none" : "gym",
     purpose: opts.primer ? "Wake the legs up. Nothing heavy, nothing new." : "Strength and robustness for the mat.",
     notes: opts.deload
-      ? "Deload week: same exercises, leave 3+ reps in reserve, no new maxes."
+      ? "Deload week: one set fewer, leave 3+ reps in reserve, no new maxes."
       : which === "peak"
         ? "Short and sharp. Moderate load, no grinding reps."
         : "Leave 1–2 reps in reserve. Quality over load.",
     ...(style === "atg" ? { variant: "atg" as const } : {}),
     ...(opts.primer ? { variant: "primer" as const } : {}),
     exercises,
+  };
+}
+
+/** Short ATG session for knees, hips and back, used alongside another main strength style. */
+export function atgPrehabSession(): Session {
+  return {
+    type: "mobility",
+    title: "ATG prehab",
+    minutes: 20,
+    intensity: "easy",
+    modality: "none",
+    purpose: "Knees, hips and back: keep the joints that grappling punishes robust.",
+    notes: "Easy and controlled. Bodyweight or very light.",
+    variant: "atg",
+    exercises: ATG_PREHAB.map((x) => ({ ...x })),
   };
 }
 

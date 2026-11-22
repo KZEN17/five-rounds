@@ -25,7 +25,7 @@ const EQUIPMENT_LABEL: Record<(typeof EQUIPMENT)[number], string> = {
 };
 const STYLE_LABEL: Record<(typeof STRENGTH_STYLES)[number], string> = {
   atg: "ATG / knees-over-toes",
-  barbell: "Barbell",
+  barbell: "Classic gym (barbell & dumbbells)",
   kettlebell: "Kettlebell",
   bodyweight: "Bodyweight",
   custom: "My own exercises",
@@ -375,6 +375,16 @@ function Strength() {
           </label>
         ))}
       </fieldset>
+      {watch("strength.style") !== "atg" ? (
+        <label className="toggle">
+          <input
+            type="checkbox"
+            checked={watch("strength.prehab") === "atg"}
+            onChange={(e) => setValue("strength.prehab", e.target.checked ? "atg" : "none", { shouldDirty: true })}
+          />
+          Add ATG prehab: knees, hips and back on easy days and as a warm-up
+        </label>
+      ) : null}
       <div className="grid grid-cols-2 items-end gap-3">
         <Select name="strength.daysPerWeek" label="Days per week" numeric options={[0, 1, 2, 3].map((n) => [n, String(n)] as const)} />
         <Num name="strength.sessionMinutes" label="Session length (min)" step="5" />

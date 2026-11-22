@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { saveLog } from "@/actions/plan";
 import type { ExerciseLog, RoundLog } from "@/lib/db/schema";
-import { mmss } from "@/lib/engine";
+import { mmss, suggestNext, type Exercise, type SetLog } from "@/lib/engine";
 import { roundStats, SESSION_META } from "@/lib/session-meta";
 import type { SessionView } from "@/lib/views";
 
@@ -47,9 +47,22 @@ export function LogForm({ session }: { session: SessionView }) {
   const [hardRounds, setHardRounds] = useState(str(log?.hardRounds));
   const [unit, setUnit] = useState<"m" | "cal">(log?.outputUnit ?? "m");
   const [rounds, setRounds] = useState<RoundLog[]>(() => Array.from({ length: n }, (_, i) => log?.rounds?.[i] ?? {}));
-  const [exercises, setExercises] = useState<ExerciseLog[]>(
-    () => log?.exercises ?? (session.exercises ?? []).map((x) => ({ name: x.name, done: false })),
+  // One entry per planned exercise (by name, so a swapped exercise starts fresh); gym lifts get a row per set.
+  const [exercises, setExercises] = useState<ExerciseLog[]>(() =>
+    (session.exercises ?? []).map((x) => {
+      const logged = log?.exercises?.find((l) => l.name === x.name);
+      if (logged) return logged;
+      return x.sets && x.reps ? { name: x.name, done: false, sets: Array.from({ length: x.sets }, () => ({ kg: null, reps: null })) } : { name: x.name, done: false };
+    }),
   );
+  const setSet = (i: number, j: number, patch: Partial<SetLog>) =>
+    setExercises((xs) =>
+      xs.map((y, k) => {
+        if (k !== i) return y;
+        const sets = (y.sets ?? []).map((s, n) => (n === j ? { ...s, ...patch } : s));
+        return { ...y, sets, done: sets.some((s) => (s.reps ?? 0) > 0) };
+      }),
+    );
   const [notes, setNotes] = useState(log?.notes ?? "");
 
   const setRound = (i: number, patch: Partial<RoundLog>) => setRounds((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
@@ -189,11 +202,20 @@ export function LogForm({ session }: { session: SessionView }) {
       ) : null}
 
       {kind === "strength" && exercises.length ? (
-        <fieldset className="flex flex-col gap-1">
-          <legend className="field mb-1">Exercises done</legend>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="field mb-1">Exercises</legend>
           {exercises.map((x, i) => {
             const plan = session.exercises?.find((e) => e.name === x.name);
-            return (
+            return x.sets && plan ? (
+              <GymLift
+                key={x.name}
+                plan={plan}
+                log={x}
+                last={session.lastSets?.[x.name]}
+                onSet={(j, patch) => setSet(i, j, patch)}
+                onAddSet={() => setExercises((xs) => xs.map((y, k) => (k === i ? { ...y, sets: [...(y.sets ?? []), { kg: y.sets?.at(-1)?.kg ?? null, reps: null }] } : y)))}
+              />
+            ) : (
               <div key={x.name} className="grid grid-cols-[auto_minmax(0,1fr)_7rem] items-center gap-2">
                 <input
                   type="checkbox"
@@ -236,6 +258,83 @@ export function LogForm({ session }: { session: SessionView }) {
           {msg}
         </span>
       </div>
+    </div>
+  );
+}
+
+const setsText = (sets: readonly SetLog[]) =>
+  sets
+    .filter((s) => s.reps)
+    .map((s) => (s.kg ? `${s.kg}×${s.reps}` : `${s.reps}`))
+    .join(", ");
+
+/** One gym lift: last time, the suggested weight, and a kg × reps row per set. */
+function GymLift({
+  plan,
+  log,
+  last,
+  onSet,
+  onAddSet,
+}: {
+  plan: Exercise;
+  log: ExerciseLog;
+  last?: { date: string; sets: SetLog[] };
+  onSet: (set: number, patch: Partial<SetLog>) => void;
+  onAddSet: () => void;
+}) {
+  const next = last ? suggestNext(plan, last.sets) : null;
+  return (
+    <div className="flex flex-col gap-1.5 rounded-[10px] bg-sunk p-2.5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+        <b>{plan.name}</b>
+        <span className="hint">
+          {plan.prescription}
+          {plan.notes ? ` · ${plan.notes}` : ""}
+        </span>
+      </div>
+      {last ? (
+        <p className="hint">
+          Last time ({last.date.slice(8)}/{last.date.slice(5, 7)}): {setsText(last.sets)}
+          {next ? <b className="text-fg"> · {next.note}</b> : null}
+        </p>
+      ) : (
+        <p className="hint">First time: start light and leave 2–3 reps in reserve.</p>
+      )}
+      <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_minmax(0,1fr)] items-center gap-x-2 gap-y-1">
+        <span className="text-[11px] font-semibold text-muted uppercase">Set</span>
+        <span className="text-[11px] font-semibold text-muted uppercase">kg</span>
+        <span className="text-[11px] font-semibold text-muted uppercase">Reps</span>
+        {(log.sets ?? []).map((s, j) => (
+          <div key={j} className="contents">
+            <span className="num text-center">{j + 1}</span>
+            <input
+              aria-label={`${plan.name} set ${j + 1} kg`}
+              inputMode="decimal"
+              className="min-h-10 py-1"
+              placeholder={next ? String(next.kg) : "kg"}
+              value={s.kg ?? ""}
+              onChange={(e) => {
+                const n = parseFloat(e.target.value.replace(",", "."));
+                onSet(j, { kg: Number.isFinite(n) ? n : null });
+              }}
+            />
+            <input
+              aria-label={`${plan.name} set ${j + 1} reps`}
+              inputMode="numeric"
+              className="min-h-10 py-1"
+              placeholder={plan.reps ? String(plan.reps) : "reps"}
+              value={s.reps ?? ""}
+              onChange={(e) => {
+                const n = parseInt(e.target.value, 10);
+                onSet(j, { reps: Number.isFinite(n) ? n : null });
+              }}
+            />
+          </div>
+        ))}
+      </div>
+      <button type="button" className="btn btn-small self-start" onClick={onAddSet}>
+        + set
+      </button>
     </div>
   );
 }

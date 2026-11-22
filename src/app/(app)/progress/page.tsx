@@ -4,6 +4,7 @@ import { CopyProgress } from "@/components/progress/copy-progress";
 import { userTimezone } from "@/lib/actions";
 import { activePlan } from "@/lib/db/plan-store";
 import { progressData } from "@/lib/db/progress-store";
+import { liftSummary } from "@/lib/db/strength-store";
 import { requireUser } from "@/lib/session";
 import { shortDate, todayIn } from "@/lib/time";
 
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Progress" };
 export default async function ProgressPage() {
   const { db } = await requireUser();
   const [plan, tz] = await Promise.all([activePlan(db), userTimezone(db)]);
-  const p = await progressData(db, plan?.output, todayIn(tz));
+  const [p, lifts] = await Promise.all([progressData(db, plan?.output, todayIn(tz)), liftSummary(db, todayIn(tz))]);
   const weeksDone = p.completion.filter((c) => c.total && c.done === c.total).length;
 
   return (
@@ -92,6 +93,41 @@ export default async function ProgressPage() {
           </div>
         ) : (
           <p className="hint">No rowing sessions logged yet.</p>
+        )}
+      </section>
+
+      <section className="panel">
+        <h3>Strength</h3>
+        <p className="hint">Your best set of each lift, as an estimated one-rep max (Epley), and the change over the last 4 weeks.</p>
+        {lifts.length ? (
+          <div className="overflow-x-auto">
+            <table className="rounds-table">
+              <thead>
+                <tr>
+                  <th>Lift</th>
+                  <th>Best set</th>
+                  <th>Est. max</th>
+                  <th>Last</th>
+                  <th>4 weeks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lifts.map((l) => (
+                  <tr key={l.name}>
+                    <td>{l.name}</td>
+                    <td className="num">{l.best ? `${l.best.kg} × ${l.best.reps}` : "–"}</td>
+                    <td className="num">{l.best ? `${Math.round(l.best.e1rm)} kg` : "–"}</td>
+                    <td className="num">{l.last ? `${l.last.kg} × ${l.last.reps}` : "–"}</td>
+                    <td className={`num ${l.change == null ? "" : l.change >= 0 ? "text-good" : "text-bad"}`}>
+                      {l.change == null ? "–" : `${l.change >= 0 ? "+" : "−"}${Math.abs(Math.round(l.change))} kg`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="hint">Log your sets (kg × reps) in a gym session to see your lifts here.</p>
         )}
       </section>
 

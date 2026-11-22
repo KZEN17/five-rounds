@@ -15,6 +15,14 @@ async function signInLink(): Promise<string> {
 }
 
 test("sign in → onboarding → plan visible → log a session", async ({ page }) => {
+  // Next's dev-only overlay badge can sit on top of the bottom tab bar on a phone-sized screen.
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const style = document.createElement("style");
+      style.textContent = "nextjs-portal { display: none !important; }";
+      document.head.append(style);
+    });
+  });
   // Sign in with a magic link.
   await page.goto("/");
   await page.getByRole("link", { name: /sign in/i }).click();
@@ -28,14 +36,37 @@ test("sign in → onboarding → plan visible → log a session", async ({ page 
   await expect(page).toHaveURL(/\/onboarding/);
   await expect(page.getByRole("heading", { name: "You" })).toBeVisible();
   await page.screenshot({ path: "test-results/screens/onboarding.png", fullPage: true });
-  for (let step = 0; step < 6; step++) await page.getByRole("button", { name: "Next", exact: true }).click();
+  for (let step = 0; step < 6; step++) {
+    if (step === 5) {
+      // Strength: classic gym as the main lift, with ATG as prehab.
+      await page.getByLabel("Classic gym (barbell & dumbbells)").check();
+      await page.getByLabel(/Add ATG prehab/).check();
+    }
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+  }
   await page.getByRole("button", { name: "Build my plan" }).click();
 
   // The plan.
   await expect(page).toHaveURL(/\/plan/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: /^Week \d+$/ })).toBeVisible();
+  // Week 1 starts on today's Monday, so on a Sunday it only has today. Week 2 is always full.
+  await page.getByRole("navigation", { name: "Plan weeks" }).getByRole("link").nth(1).click();
+  await expect(page.getByRole("heading", { name: "Week 2" })).toBeVisible();
   await expect(page.getByText("Hard BJJ").first()).toBeVisible();
   await page.screenshot({ path: "test-results/screens/plan.png", fullPage: true });
+
+  // A gym day: ATG warm-up first, then kg × reps per set; the lift can be swapped.
+  await page.getByRole("button", { name: /Gym A/ }).first().click();
+  const lifts = page.getByRole("group", { name: "Exercises" }).first();
+  await expect(lifts.getByText("ATG warm-up")).toBeVisible();
+  await lifts.getByLabel(/ set 1 kg$/).first().fill("60");
+  await lifts.getByLabel(/ set 1 reps$/).first().fill("5");
+  const gymLog = lifts.locator("xpath=..");
+  await gymLog.getByRole("button", { name: "Save log" }).click();
+  await expect(gymLog.getByRole("status")).toHaveText("Saved.");
+  await page.getByLabel("Swap Back squat").first().selectOption("Front squat");
+  await expect(page.getByLabel("Swap Front squat").first()).toBeVisible();
+  await page.screenshot({ path: "test-results/screens/gym.png", fullPage: true });
 
   // Log today's first session from Today.
   await page.getByRole("link", { name: "Today" }).click();

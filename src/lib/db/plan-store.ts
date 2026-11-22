@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, isNull, lte, notExists } from "drizzle-orm";
-import { generatePlan, type IsoDate, type Plan, type PlanInput, type Session } from "@/lib/engine";
+import { generatePlan, withInputDefaults, type IsoDate, type Plan, type PlanInput, type Session } from "@/lib/engine";
 import { calendarDate } from "@/lib/time";
 import { fieldsFromInput, saveMainCompetition } from "./competition-store";
 import { planInputs, plans, planSessions, profiles, sessionLogs, weights, type SessionParams } from "./schema";
@@ -19,7 +19,8 @@ export function toSession(row: Pick<SessionRow, "type" | "title" | "params" | "t
 
 export async function latestInput(db: ScopedDb) {
   const [row] = await db.select(planInputs).orderBy(desc(planInputs.version)).limit(1);
-  return row;
+  // Answers saved before a field existed get its default, so they still parse and regenerate.
+  return row ? { ...row, data: withInputDefaults(row.data) } : row;
 }
 
 export async function activePlan(db: ScopedDb) {

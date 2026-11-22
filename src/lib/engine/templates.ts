@@ -2,7 +2,7 @@ import { pickModality } from "./conditioning";
 import type { IsoDate } from "./dates";
 import type { PlanInput } from "./input";
 import * as S from "./sessions";
-import { mobilitySession, strengthSession } from "./strength";
+import { atgPrehabSession, mobilitySession, strengthSession } from "./strength";
 import type { Phase, Plan, Session, SessionType } from "./types";
 
 export type TemplateContext = {
@@ -31,9 +31,11 @@ export function sessionTemplate(type: SessionType, ctx: TemplateContext): Sessio
     case "aerobic":
       return S.aerobic(pickModality("aerobic", input.equipment, input.profile.injuries).modality, ctx.aerobicMinutes);
     case "strength":
-      return strengthSession(input.strength.style, ctx.phase === "taper" ? "peak" : ctx.phase, input.strength.sessionMinutes, input.strength.customExercises);
+      return strengthSession(input.strength.style, ctx.phase === "taper" ? "peak" : ctx.phase, input.strength.sessionMinutes, input.strength.customExercises, {
+        prehab: input.strength.prehab,
+      });
     case "mobility":
-      return mobilitySession(input.strength.style);
+      return input.strength.prehab === "atg" && input.strength.style !== "atg" ? atgPrehabSession() : mobilitySession(input.strength.style);
     case "walk":
       return S.walk();
     case "competition":

@@ -35,7 +35,7 @@ export const zlatko: PlanInput = {
     preferredTime: "any",
   },
   equipment: ["bike", "rower"],
-  strength: { style: "atg", daysPerWeek: 2, sessionMinutes: 45, customExercises: [] },
+  strength: { style: "atg", daysPerWeek: 2, sessionMinutes: 45, customExercises: [], prehab: "none" },
   nutrition: { activityFactor: 1.2, proteinGPerKg: 2, protectHardDays: true, dietaryNotes: "" },
 };
 

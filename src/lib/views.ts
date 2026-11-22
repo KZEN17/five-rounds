@@ -1,5 +1,5 @@
 import type { LogRow, SessionRow } from "@/lib/db/plan-store";
-import { weekdayOf, type Exercise, type IsoDate, type Modality, type SessionType } from "@/lib/engine";
+import { weekdayOf, type Exercise, type IsoDate, type Modality, type SessionType, type SetLog } from "@/lib/engine";
 
 export type LogView = Pick<
   LogRow,
@@ -21,6 +21,8 @@ export type SessionView = {
   notes: string;
   exercises?: Exercise[];
   log: LogView | null;
+  /** Gym work: what you did last time on each exercise. */
+  lastSets?: Record<string, { date: IsoDate; sets: SetLog[] }>;
 };
 
 export type DayView = { date: IsoDate; weekday: number; isToday: boolean; edited: boolean; beforeStart: boolean; sessions: SessionView[] };

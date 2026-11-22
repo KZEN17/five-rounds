@@ -11,3 +11,4 @@ export * from "./types";
 export { contextFor, sessionTemplate, type TemplateContext } from "./templates";
 export * from "./outlook";
 export * from "./reports";
+export * from "./lifting";

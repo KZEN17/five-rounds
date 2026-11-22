@@ -63,6 +63,7 @@ export function generatePlan(input: PlanInput, today: Date): Plan {
   const out: PlanWeek[] = [];
   const phaseWeek: Partial<Record<Phase, number>> = {};
   let k = 0; // build weeks so far: drives the aerobic progression
+  let strengthSoFar = 0; // keeps gym A/B alternating across weeks
   for (let w = 0; w < weeks; w++) {
     const phase = split.phases[w] ?? "taper";
     const deload = split.deload[w] ?? false;
@@ -88,7 +89,7 @@ export function generatePlan(input: PlanInput, today: Date): Plan {
         message: `With ${input.availability.extraSessions} extra session a week there's room for one hard conditioning session. The second one this phase calls for is dropped.`,
       });
     }
-    const { days, warnings: weekWarnings } = scheduleWeek({
+    const { days, warnings: weekWarnings, strengthPlaced } = scheduleWeek({
       input,
       dates: Array.from({ length: 7 }, (_, i) => addDays(start, w * 7 + i)),
       today: todayIso,
@@ -104,10 +105,12 @@ export function generatePlan(input: PlanInput, today: Date): Plan {
       restSec: rt.restSec,
       aerobic,
       strengthCount: Math.min(strengthDays, STRENGTH_PER_PHASE[phase]),
+      strengthOffset: strengthSoFar,
       intervalModality: interval.modality,
       aerobicModality: easy.modality,
     });
     weekWarnings.forEach(add);
+    strengthSoFar += strengthPlaced;
     out.push({ index: w + 1, start: addDays(start, w * 7), phase, deload, days });
     phaseWeek[phase] = pw + 1;
     if (phase !== "taper") k++;

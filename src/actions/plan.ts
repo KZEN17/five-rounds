@@ -6,7 +6,7 @@ import { z } from "zod";
 import { UserError, userAction, type ActionContext } from "@/lib/actions";
 import { activePlan, latestInput, sessionsFor, toParams } from "@/lib/db/plan-store";
 import { planSessions, sessionLogs, weekMarks } from "@/lib/db/schema";
-import { contextFor, sessionTemplate, type Session, type SessionType } from "@/lib/engine";
+import { alternativesFor, contextFor, sessionTemplate, type Session, type SessionType } from "@/lib/engine";
 
 const SESSION_TYPES = [
   "bjj",
@@ -188,7 +188,14 @@ export const saveLog = userAction(
       .max(12)
       .nullable(),
     exercises: z
-      .array(z.object({ name: z.string().max(80), done: z.boolean(), detail: z.string().max(80).optional() }))
+      .array(
+        z.object({
+          name: z.string().max(80),
+          done: z.boolean(),
+          detail: z.string().max(80).optional(),
+          sets: z.array(z.object({ kg: z.number().min(0).max(500).nullable(), reps: z.number().int().min(0).max(100).nullable() })).max(12).optional(),
+        }),
+      )
       .max(30)
       .nullable(),
     notes: z.string().max(2000).nullable(),
@@ -198,6 +205,22 @@ export const saveLog = userAction(
     await ctx.db
       .insert(sessionLogs, { sessionId, date: row.date, ...log })
       .onConflictDoUpdate({ target: sessionLogs.sessionId, set: log });
+    refresh();
+    return null;
+  },
+);
+
+/** Swaps one exercise in a session for another of the same movement pattern. */
+export const swapExercise = userAction(
+  z.object({ sessionId: z.uuid(), index: z.number().int().min(0).max(30), name: z.string().trim().min(1).max(80) }),
+  async ({ sessionId, index, name }, ctx) => {
+    const row = await ownSession(ctx, sessionId);
+    const exercises = [...(row.params.exercises ?? [])];
+    const current = exercises[index];
+    if (!current) throw new UserError("That exercise isn't in this session.");
+    if (!alternativesFor(current).includes(name)) throw new UserError(`${name} isn't a swap for ${current.name}.`);
+    exercises[index] = { ...current, name };
+    await ctx.db.update(planSessions, { params: { ...row.params, exercises }, source: "user" }, eq(planSessions.id, sessionId));
     refresh();
     return null;
   },

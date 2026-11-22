@@ -63,6 +63,12 @@ describe("dailyReport", () => {
     expect(noFood.nextStep).toMatch(/Log your food/);
   });
 
+  it("celebrates new lifting bests", () => {
+    const r = dailyReport(day({ newBests: ["Back squat 100 kg × 5"] }), null, null);
+    expect(r.highlights).toContain("New best: Back squat 100 kg × 5.");
+    expect(dailyReport(day(), null, null).highlights.join(" ")).not.toMatch(/New best/);
+  });
+
   it("makes a short push text", () => {
     const t = pushText(dailyReport(day(), null, null));
     expect(t.title).toBe("Yesterday was a great day.");

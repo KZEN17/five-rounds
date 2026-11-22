@@ -77,6 +77,8 @@ export const strengthInput = z.object({
   daysPerWeek: z.number().int().min(0).max(3),
   sessionMinutes: z.number().int().min(15).max(120),
   customExercises: z.array(z.string().trim().min(1).max(80)).max(20),
+  /** ATG knees/hips/back work on easy days and as a warm-up, alongside another main style. */
+  prehab: z.enum(["none", "atg"]),
 });
 
 export const nutritionInput = z.object({
@@ -139,7 +141,12 @@ export function defaultPlanInput(today: IsoDate): PlanInput {
       preferredTime: "any",
     },
     equipment: ["bike"],
-    strength: { style: "bodyweight", daysPerWeek: 2, sessionMinutes: 45, customExercises: [] },
+    strength: { style: "bodyweight", daysPerWeek: 2, sessionMinutes: 45, customExercises: [], prehab: "none" },
     nutrition: { activityFactor: 1.2, proteinGPerKg: 2, protectHardDays: true, dietaryNotes: "" },
   };
+}
+
+/** Fills fields added after an answer set was saved, so older plan inputs still parse. */
+export function withInputDefaults(data: PlanInput): PlanInput {
+  return { ...data, strength: { ...data.strength, prehab: data.strength.prehab ?? "none" } };
 }

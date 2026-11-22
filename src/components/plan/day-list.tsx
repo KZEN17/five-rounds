@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { addSession, removeSession, resetDay, setDayDone, setSessionParams, setTimeOfDay, swapSession } from "@/actions/plan";
+import { addSession, removeSession, resetDay, setDayDone, setSessionParams, setTimeOfDay, swapExercise, swapSession } from "@/actions/plan";
 import type { ActionResult } from "@/lib/actions";
-import { WEEKDAYS, type SessionType } from "@/lib/engine";
+import { alternativesFor, WEEKDAYS, type SessionType } from "@/lib/engine";
 import { logSummary, SESSION_META, SWAP_TYPES, tagFor, TIMES, TONE_CLASS } from "@/lib/session-meta";
 import { shortDate } from "@/lib/time";
 import type { DayView, SessionView } from "@/lib/views";
@@ -157,6 +157,9 @@ function SessionEditor({ s }: { s: SessionView }) {
   const meta = SESSION_META[s.type];
   const rounded = s.type === "comp_sim" || s.type === "intervals";
   const timed = s.type === "aerobic" || s.type === "custom" || s.type === "strength";
+  const swappable = (s.type === "strength" ? (s.exercises ?? []) : [])
+    .map((x, i) => ({ x, i, swaps: alternativesFor(x) }))
+    .filter((e) => e.swaps.length > 1);
   return (
     <div className="flex flex-col gap-2.5 border-t border-dashed border-line pt-3 first:border-t-0 first:pt-0">
       <strong className="font-semibold">
@@ -164,7 +167,7 @@ function SessionEditor({ s }: { s: SessionView }) {
         {s.title}
       </strong>
       {s.notes ? <p className="hint">{s.notes}</p> : null}
-      {s.exercises?.length && !s.log ? (
+      {s.type !== "strength" && s.exercises?.length && !s.log ? (
         <ul className="hint list-disc pl-5">
           {s.exercises.map((x) => (
             <li key={x.name}>
@@ -173,6 +176,29 @@ function SessionEditor({ s }: { s: SessionView }) {
             </li>
           ))}
         </ul>
+      ) : null}
+      {swappable.length ? (
+        <div className="flex flex-col gap-1.5">
+          <span className="field">Swap an exercise</span>
+          <div className="grid grid-cols-2 gap-2">
+            {swappable.map(({ x, i, swaps }) => (
+              <select
+                key={`${i}-${x.name}`}
+                aria-label={`Swap ${x.name}`}
+                className="min-h-10 min-w-0 py-1 text-sm"
+                value={x.name}
+                disabled={pending}
+                onChange={(e) => run(() => swapExercise({ sessionId: s.id, index: i, name: e.target.value }))}
+              >
+                {swaps.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            ))}
+          </div>
+        </div>
       ) : null}
       <div className="grid grid-cols-2 gap-2">
         <label className="field">
@@ -218,7 +244,8 @@ function SessionEditor({ s }: { s: SessionView }) {
           </label>
         ) : null}
       </div>
-      <LogForm session={s} />
+      {/* Re-key on the exercise list so a swap starts that exercise's log fresh. */}
+      <LogForm key={(s.exercises ?? []).map((x) => x.name).join("|")} session={s} />
       <button type="button" className="btn btn-small self-start" disabled={pending} onClick={() => run(() => removeSession({ sessionId: s.id }))}>
         Remove this session
       </button>

@@ -224,7 +224,7 @@ export const planSessions = pgTable(
 );
 
 export type RoundLog = { rpe?: number | null; gas?: "Attacking" | "Holding on" | "Survival" | null; endHr?: number | null; recHr?: number | null; output?: number | null };
-export type ExerciseLog = { name: string; done: boolean; detail?: string };
+export type ExerciseLog = { name: string; done: boolean; detail?: string; sets?: { kg: number | null; reps: number | null }[] };
 
 export const sessionLogs = pgTable(
   "session_logs",

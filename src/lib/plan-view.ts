@@ -6,7 +6,8 @@ import { weekMarks } from "@/lib/db/schema";
 import type { ScopedDb } from "@/lib/db/scoped";
 import { addDays, daysBetween } from "@/lib/engine";
 import { todayIn } from "@/lib/time";
-import { buildDays } from "@/lib/views";
+import { lastBefore, liftHistory } from "@/lib/db/strength-store";
+import { buildDays, type DayView } from "@/lib/views";
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
@@ -36,6 +37,14 @@ export async function loadPlan(db: ScopedDb, requestedWeek?: number) {
     };
   });
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(out.weeks[week - 1]!.start, i));
+  const history = await liftHistory(db);
+  const withHistory = (days: DayView[]) =>
+    days.map((d) => ({
+      ...d,
+      sessions: d.sessions.map((s) =>
+        s.type === "strength" && s.exercises?.length ? { ...s, lastSets: lastBefore(history, s.exercises.map((x) => x.name), d.date) } : s,
+      ),
+    }));
   return {
     plan,
     input: input.data,
@@ -44,8 +53,8 @@ export async function loadPlan(db: ScopedDb, requestedWeek?: number) {
     week,
     currentWeek,
     weekStats,
-    days: buildDays(rows, weekDates, plan.id, today, plan.output.generatedOn),
-    todayDay: buildDays(rows, [today], plan.id, today, plan.output.generatedOn)[0]!,
+    days: withHistory(buildDays(rows, weekDates, plan.id, today, plan.output.generatedOn)),
+    todayDay: withHistory(buildDays(rows, [today], plan.id, today, plan.output.generatedOn))[0]!,
     daysToComp: daysBetween(today, out.compDate),
   };
 }

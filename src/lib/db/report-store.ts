@@ -13,6 +13,7 @@ import {
 } from "@/lib/engine";
 import { roundStats } from "@/lib/session-meta";
 import { dayNumbers } from "./fuel-store";
+import { liftHistory, newBestsOn } from "./strength-store";
 import { sessionsBetween } from "./plan-store";
 import { readiness, reports, weights } from "./schema";
 import type { ScopedDb } from "./scoped";
@@ -42,11 +43,12 @@ async function flaggedOn(db: ScopedDb, date: IsoDate) {
 
 /** Facts for one day, or null when there's nothing to report (no plan and nothing logged). */
 export async function dayFacts(db: ScopedDb, date: IsoDate, input: PlanInput) {
-  const [rows, numbers, lastWeight, flags] = await Promise.all([
+  const [rows, numbers, lastWeight, flags, lifts] = await Promise.all([
     sessionsBetween(db, date, addDays(date, 1)),
     dayNumbers(db, date, input),
     db.select(weights, lte(weights.date, date)).orderBy(desc(weights.date)).limit(1),
     flaggedOn(db, date),
+    liftHistory(db, date),
   ]);
   const live = rows.filter((r) => !r.session.deletedAt);
   const onDay = live.filter((r) => r.session.date === date);
@@ -73,6 +75,7 @@ export async function dayFacts(db: ScopedDb, date: IsoDate, input: PlanInput) {
       daysSinceWeighIn: lastWeight[0] ? daysBetween(lastWeight[0].date, date) : null,
       readinessFlags: flags,
       nextPlan: live.filter((r) => r.session.date === addDays(date, 1)).map((r) => r.session.title),
+      newBests: newBestsOn(lifts, date),
     },
     pace: paceFrom(numbers.outlook, numbers.trend.trendKg),
   };
